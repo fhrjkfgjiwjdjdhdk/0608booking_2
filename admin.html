@@ -146,6 +146,14 @@
     .slot-block__stats  { font-size: 9px; color: #8a5050; line-height: 1.6; }
     .slot-block__hint   { font-size: 9px; color: #5a3030; margin-top: 2px; }
 
+    .pending-block {
+      background: #3a0808; border: 1px dashed #aa3030;
+      padding: 4px 6px; margin-bottom: 3px;
+      font-size: 10px; color: #e08080; text-align: center;
+    }
+    .pending-block__time { font-size: 11px; letter-spacing: 1px; margin-bottom: 2px; font-weight: 500; }
+    .pending-block__hint { font-size: 9px; color: #aa6060; }
+
     /* 小時格 */
     .day-hour {
       height: 28px;
@@ -154,8 +162,8 @@
       transition: background .1s;
     }
     .day-hour:hover       { background: #16120e; }
-    .day-hour.is-in-range { background: #1a0808; border-color: #5a1a1a; }
-    .day-hour.is-pending  { background: #1a0808; }
+    .day-hour.is-in-range { background: #3a0a0a; border-color: #8a2020; }
+    .day-hour.is-pending  { background: #3a0a0a; }
 
     /* ── Stats Bar ── */
     .stats-bar {
@@ -542,7 +550,21 @@ function renderCalendar(dates) {
       '</div>';
     }).join('');
 
-    return '<div class="day-col">' + header + '<div class="day-col__slots">' + slotBlocks + '</div>' + hourCells + '</div>';
+    // 待儲存提示塊
+    const pendingBlock = pending
+      ? '<div class="pending-block">' +
+          '<p class="pending-block__time">' +
+            String(Math.min(pending.startH, pending.endH)).padStart(2,'0') + ':00' +
+            '–' +
+            String(Math.max(pending.startH, pending.endH) + 1).padStart(2,'0') + ':00' +
+          '</p>' +
+          '<p class="pending-block__hint">▲ 待儲存</p>' +
+        '</div>'
+      : '';
+
+    return '<div class="day-col">' + header +
+      '<div class="day-col__slots">' + slotBlocks + pendingBlock + '</div>' +
+      hourCells + '</div>';
   }).join('');
 
   wrap.innerHTML = timeAxis + '<div class="week-cols">' + dayCols + '</div>';
