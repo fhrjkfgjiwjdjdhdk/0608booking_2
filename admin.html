@@ -396,6 +396,19 @@ function showApp() {
   loadCourses();
 }
 
+// ── 時段管理 state（必須在 showApp 呼叫前宣告）────────────────
+let weekOffset   = 0;
+let weekSlots    = [];
+let pendingCells = {};
+let dragState    = null;
+
+// ── 預約紀錄 state ───────────────────────────────────────────
+let allBookings   = [];
+let selectedMonth = '';
+
+// ── 課程 state ───────────────────────────────────────────────
+let allTemplates = [];
+
 if (sessionToken) showApp();
 
 document.getElementById('login-pwd').addEventListener('keydown', e => {
@@ -440,10 +453,6 @@ function showToast(msg, duration) {
 // ══════════════════════════════════════════════════════════════
 //  時段管理
 // ══════════════════════════════════════════════════════════════
-let weekOffset   = 0;
-let weekSlots    = [];
-let pendingCells = {};   // { 'YYYY/MM/DD': { startH, endH } }
-let dragState    = null;
 
 function getWeekDates(offset) {
   offset = offset || 0;
@@ -602,8 +611,6 @@ async function saveNewSlots() {
 // ══════════════════════════════════════════════════════════════
 //  預約紀錄
 // ══════════════════════════════════════════════════════════════
-let allBookings   = [];
-let selectedMonth = '';
 
 async function loadBookings() {
   try {
@@ -718,7 +725,6 @@ async function cancelBooking(bookingId) {
 // ══════════════════════════════════════════════════════════════
 //  課程編輯
 // ══════════════════════════════════════════════════════════════
-let allTemplates = [];
 
 async function loadCourses() {
   try {
