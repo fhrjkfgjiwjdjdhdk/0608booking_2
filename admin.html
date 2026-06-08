@@ -658,8 +658,8 @@ async function deleteSlot(id, date, start, end) {
   try {
     const res = await apiPost({ action: 'deleteSlot', token: sessionToken, slotId: id });
     if (!res.success) throw new Error(res.message);
-    showToast('已刪除時段');
     await initWeekCalendar();
+    showToast('已刪除時段');
   } catch (e) { showToast('刪除失敗：' + e.message); }
 }
 
@@ -687,9 +687,9 @@ async function saveNewSlots() {
   }
 
   pendingCells = {};
+  await initWeekCalendar();
   btn.disabled = false; btn.textContent = '✦ 儲存新增時段';
   showToast(fail ? '完成（' + ok + ' 成功，' + fail + ' 失敗）' : '已新增 ' + ok + ' 個時段');
-  await initWeekCalendar();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -807,8 +807,8 @@ async function cancelBooking(bookingId) {
   try {
     const res = await apiPost({ action: 'reject', bookingId });
     if (!res.success) throw new Error(res.message);
-    showToast('已取消預約，通知信已寄出');
     await loadBookings();
+    showToast('已取消預約，通知信已寄出');
   } catch (e) {
     showToast('取消失敗：' + e.message);
     btn.disabled = false; btn.textContent = '取消此預約';
