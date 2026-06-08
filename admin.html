@@ -134,7 +134,6 @@
     .day-col__header-day  { font-size: 10px; color: #5a4a40; }
 
     /* 已存在的時段塊（顯示在 header 下方） */
-    .day-col__slots { padding: 2px; }
     .slot-block {
       background: #1a0808; border: 1px solid #5a1a1a;
       padding: 4px 6px; margin-bottom: 3px; cursor: pointer;
@@ -164,6 +163,21 @@
     .day-hour:hover       { background: #16120e; }
     .day-hour.is-in-range { background: #5a0f0f; border-color: #cc3333; }
     .day-hour.is-pending  { background: #5a0f0f; }
+
+    /* ── Slots Row（週曆上方等寬時段列）── */
+    .slots-row {
+      display: flex;
+      margin-bottom: 4px;
+      overflow-x: auto;
+    }
+    .slots-row__axis {
+      flex-shrink: 0;
+      width: 44px;
+      border-right: 1px solid #2a1f1a;
+    }
+    .slots-row__cols { display: flex; flex: 1; min-width: 0; }
+    .slots-row__col  { flex: 1; min-width: 72px; padding: 2px; border-right: 1px solid #1a1410; }
+    .slots-row__col:last-child { border-right: none; }
 
     /* ── Stats Bar ── */
     .stats-bar {
@@ -527,13 +541,7 @@ function renderCalendar(dates) {
         '<span class="day-col__header-day">（' + DAY_NAMES[dayIdx] + '）</span>' +
       '</div>';
 
-    // 已有時段塊
-    const slotBlocks = existing.map(function(s) {
-      return '<div class="slot-block" onclick="deleteExistingSlot(\'' + s.id + '\',\'' + dateStr + '\',\'' + s.start_time + '\',\'' + s.end_time + '\')">' +
-        '<p class="slot-block__time">' + s.start_time + '–' + s.end_time + '</p>' +
-        '<p class="slot-block__hint">點擊刪除</p>' +
-      '</div>';
-    }).join('');
+    // 已有時段塊（改由 slots-row 渲染，此處不放入日欄）
 
     // 小時格
     const hourCells = HOURS.map(function(h) {
@@ -551,13 +559,28 @@ function renderCalendar(dates) {
       '</div>';
     }).join('');
 
-    // 待儲存提示塊不放在日欄裡
-    return '<div class="day-col">' + header +
-      '<div class="day-col__slots">' + slotBlocks + '</div>' +
-      hourCells + '</div>';
+    return '<div class="day-col">' + header + hourCells + '</div>';
   }).join('');
 
-  wrap.innerHTML = timeAxis + '<div class="week-cols">' + dayCols + '</div>';
+  // ── Slots Row（日欄上方，等寬顯示已儲存時段）──
+  const slotsRowCols = dates.map(function(date) {
+    const dateStr  = fmtDate(date);
+    const existing = weekSlots.filter(s => s.date === dateStr);
+    const blocks   = existing.map(function(s) {
+      return '<div class="slot-block" onclick="deleteExistingSlot(\'' + s.id + '\',\'' + dateStr + '\',\'' + s.start_time + '\',\'' + s.end_time + '\')">' +
+        '<p class="slot-block__time">' + s.start_time + '–' + s.end_time + '</p>' +
+        '<p class="slot-block__hint">點擊刪除</p>' +
+      '</div>';
+    }).join('');
+    return '<div class="slots-row__col">' + blocks + '</div>';
+  }).join('');
+
+  const slotsRow = '<div class="slots-row">' +
+    '<div class="slots-row__axis"></div>' +
+    '<div class="slots-row__cols">' + slotsRowCols + '</div>' +
+  '</div>';
+
+  wrap.innerHTML = slotsRow + timeAxis + '<div class="week-cols">' + dayCols + '</div>';
 }
 
 // 拖曳選取
