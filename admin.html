@@ -162,8 +162,8 @@
       transition: background .1s;
     }
     .day-hour:hover       { background: #16120e; }
-    .day-hour.is-in-range { background: #3a0a0a; border-color: #8a2020; }
-    .day-hour.is-pending  { background: #3a0a0a; }
+    .day-hour.is-in-range { background: #5a0f0f; border-color: #cc3333; }
+    .day-hour.is-pending  { background: #5a0f0f; }
 
     /* ── Stats Bar ── */
     .stats-bar {
@@ -317,10 +317,11 @@
       </div>
     </div>
 
+    <!-- 待儲存摘要（週曆上方） -->
+    <div id="pending-summary" style="display:none;margin:0 0 10px;padding:10px 14px;border:1px dashed #aa3030;background:#2a0808;font-size:12px;color:#e08080;line-height:1.8"></div>
+
     <!-- 週曆：時間軸 + 日欄 -->
-    <div class="calendar-wrap" id="calendar-wrap">
-      <!-- 由 JS 渲染 -->
-    </div>
+    <div class="calendar-wrap" id="calendar-wrap"></div>
 
     <p style="font-size:11px;color:#5a4a40;line-height:1.8">
       在格子上按住拖曳選取時間範圍，放開後按「儲存新增時段」；已設定的時段點擊可刪除。<br>
@@ -550,20 +551,9 @@ function renderCalendar(dates) {
       '</div>';
     }).join('');
 
-    // 待儲存提示塊
-    const pendingBlock = pending
-      ? '<div class="pending-block">' +
-          '<p class="pending-block__time">' +
-            String(Math.min(pending.startH, pending.endH)).padStart(2,'0') + ':00' +
-            '–' +
-            String(Math.max(pending.startH, pending.endH) + 1).padStart(2,'0') + ':00' +
-          '</p>' +
-          '<p class="pending-block__hint">▲ 待儲存</p>' +
-        '</div>'
-      : '';
-
+    // 待儲存提示塊不放在日欄裡
     return '<div class="day-col">' + header +
-      '<div class="day-col__slots">' + slotBlocks + pendingBlock + '</div>' +
+      '<div class="day-col__slots">' + slotBlocks + '</div>' +
       hourCells + '</div>';
   }).join('');
 
@@ -582,7 +572,17 @@ function extendDrag(date, hour) {
   updatePending(date, dragState.startH, hour);
 }
 
-function endDrag() { dragState = null; }
+function endDrag() {
+  if (dragState) {
+    // 起點和終點相同 → 單格點擊，視為取消該天選取
+    if (dragState.startH === dragState.endH) {
+      delete pendingCells[dragState.date];
+      renderCalendar(getWeekDates(weekOffset));
+      renderPendingSummary();
+    }
+  }
+  dragState = null;
+}
 document.addEventListener('mouseup', endDrag);
 
 function updatePending(date, h1, h2) {
@@ -590,6 +590,24 @@ function updatePending(date, h1, h2) {
   const hi = Math.max(h1, h2);
   pendingCells[date] = { startH: lo, endH: hi };
   renderCalendar(getWeekDates(weekOffset));
+  renderPendingSummary();
+}
+
+function renderPendingSummary() {
+  const el      = document.getElementById('pending-summary');
+  const entries = Object.entries(pendingCells);
+  if (!entries.length) { el.style.display = 'none'; return; }
+
+  const lines = entries.map(function(e) {
+    const date = e[0];
+    const cell = e[1];
+    const startH = String(cell.startH).padStart(2, '0');
+    const endH   = String(cell.endH + 1).padStart(2, '0');
+    return '▲ ' + date + '　' + startH + ':00 – ' + endH + ':00　（待儲存）';
+  });
+
+  el.innerHTML  = lines.join('<br>');
+  el.style.display = 'block';
 }
 
 async function deleteExistingSlot(id, date, start, end) {
@@ -626,6 +644,7 @@ async function saveNewSlots() {
 
   pendingCells = {};
   btn.disabled = false; btn.textContent = '✦ 儲存新增時段';
+  document.getElementById('pending-summary').style.display = 'none';
   showToast(fail ? '儲存完成（' + ok + ' 成功，' + fail + ' 失敗）' : '已新增 ' + ok + ' 個時段');
   await initWeekGrid();
 }
