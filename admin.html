@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>後台管理｜isroom 遺室</title>
   <style>
-    /* ── Reset & Base ── */
+    /* ── Reset ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       overflow-x: hidden; max-width: 100%;
@@ -17,341 +17,398 @@
     /* ── Login ── */
     #login-page {
       min-height: 100vh;
-      display: flex; align-items: center; justify-content: center; padding: 20px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
     }
     .login-card {
-      background: #16120e; border: 1px solid #3d1010;
+      background: #16120e; border: 1px solid #2a1f1a;
       padding: 40px 32px; width: 100%; max-width: 360px; text-align: center;
     }
     .login-symbol { font-size: 28px; margin-bottom: 16px; display: block; }
-    .login-title  { font-size: 16px; letter-spacing: 3px; margin-bottom: 24px; font-weight: 400; }
+    .login-title  { font-size: 15px; letter-spacing: 3px; margin-bottom: 24px; font-weight: 400; color: #e8e0d5; }
     .login-input {
       display: block; width: 100%; background: #0e0a08;
-      border: 1px solid #3a2a22; color: #e8e0d5;
-      font-size: 15px; padding: 14px; margin-bottom: 16px;
-      outline: none; border-radius: 0; font-family: inherit; -webkit-appearance: none;
+      border: 1px solid #6a5a50; color: #e8e0d5;
+      font-size: 15px; padding: 12px 14px; margin-bottom: 14px;
+      outline: none; border-radius: 0; font-family: inherit;
     }
-    .login-input:focus { border-color: #6a3020; }
+    .login-input:focus { border-color: #9a8f82; }
     .login-btn {
       display: block; width: 100%; background: transparent;
-      border: 1px solid #6a2a20; color: #e8e0d5;
-      font-size: 13px; letter-spacing: 3px; padding: 16px;
-      cursor: pointer; font-family: inherit; border-radius: 0; -webkit-appearance: none;
+      border: 1px solid #6a5a50; color: #9a8f82;
+      font-size: 12px; letter-spacing: 3px; padding: 14px;
+      cursor: pointer; font-family: inherit; border-radius: 0;
+      transition: border-color .2s, color .2s;
     }
-    .login-btn:hover    { background: #1e0c0c; }
+    .login-btn:hover    { border-color: #9a8f82; color: #e8e0d5; }
     .login-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .login-error { font-size: 12px; color: #c44; margin-top: 12px; min-height: 18px; }
+    .login-error { font-size: 12px; color: #c44; margin-top: 10px; min-height: 18px; }
 
     /* ── App Shell ── */
     #app { display: none; }
     .app-header {
       background: #16120e; border-bottom: 1px solid #2a1f1a;
-      padding: 14px 20px;
+      padding: 12px 20px;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .app-brand  { font-size: 13px; letter-spacing: 3px; color: #9a8f82; }
+    .app-brand { font-size: 12px; letter-spacing: 3px; color: #9a8f82; }
     .app-logout {
-      background: none; border: 1px solid #3a2a22; color: #6a5a50;
-      font-size: 11px; letter-spacing: 2px; padding: 6px 12px;
-      cursor: pointer; font-family: inherit;
+      background: none; border: 1px solid #6a5a50; color: #9a8070;
+      font-size: 11px; letter-spacing: 2px; padding: 5px 12px;
+      cursor: pointer; font-family: inherit; border-radius: 0;
+      transition: border-color .2s, color .2s;
     }
-    .app-logout:hover { border-color: #5a2a20; color: #9a8f82; }
+    .app-logout:hover { border-color: #9a8f82; color: #e8e0d5; }
 
     /* ── Tabs ── */
-    .tab-bar { display: flex; border-bottom: 1px solid #2a1f1a; background: #0e0a08; overflow-x: auto; }
+    .tab-bar {
+      display: flex; border-bottom: 1px solid #2a1f1a;
+      background: #0e0a08; overflow-x: auto;
+    }
     .tab-btn {
-      flex-shrink: 0; background: none; border: none; color: #6a5a50;
-      font-size: 12px; letter-spacing: 2px; padding: 14px 18px;
-      cursor: pointer; font-family: inherit; border-bottom: 2px solid transparent;
-      transition: color .2s; white-space: nowrap;
+      flex: 1; flex-shrink: 0; background: none; border: none;
+      border-bottom: 2px solid transparent;
+      color: #6a5a50; font-size: 12px; letter-spacing: 2px;
+      padding: 12px 10px; cursor: pointer; font-family: inherit;
+      white-space: nowrap; transition: color .15s;
     }
     .tab-btn.is-active { color: #e8e0d5; border-bottom-color: #8a2a20; }
+    .tab-btn:not(.is-active):hover { color: #9a8f82; }
 
-    /* ── Content ── */
-    .tab-panel { display: none; padding: 20px; }
+    /* ── Panels ── */
+    .tab-panel { display: none; padding: 16px; }
     .tab-panel.is-active { display: block; }
-    .section-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
-    }
-    .section-title { font-size: 12px; letter-spacing: 3px; color: #9a8f82; }
 
-    /* ── Week Calendar ── */
-    .week-nav { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .week-nav-btn {
-      background: none; border: 1px solid #3a2a22; color: #9a8f82;
-      font-size: 12px; padding: 6px 12px; cursor: pointer; font-family: inherit;
+    .section-title { font-size: 10px; letter-spacing: 3px; color: #9a8070; }
+
+    .row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
     }
-    .week-nav-btn:hover { border-color: #5a2a20; color: #e8e0d5; }
-    .week-label { font-size: 12px; color: #6a5a50; letter-spacing: 1px; }
+
+    /* ── 週導航 ── */
+    .week-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .nav-btn {
+      background: none; border: 1px solid #6a5a50; color: #9a8070;
+      font-size: 11px; letter-spacing: 1px; padding: 5px 12px;
+      cursor: pointer; font-family: inherit; border-radius: 0;
+      transition: border-color .2s, color .2s;
+    }
+    .nav-btn:hover { border-color: #9a8f82; color: #e8e0d5; }
+    .week-label { font-size: 11px; color: #9a8070; min-width: 160px; text-align: center; }
+
+    /* ── 工具列 ── */
+    .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .cap-group { display: flex; align-items: center; gap: 8px; }
+    .cap-input {
+      width: 52px; background: #0e0a08;
+      border: 1px solid #6a5a50; color: #e8e0d5;
+      padding: 6px; font-size: 12px; text-align: center;
+      font-family: inherit; border-radius: 0; outline: none;
+      transition: border-color .2s;
+    }
+    .cap-input:focus { border-color: #9a8f82; }
+    .cap-label { font-size: 11px; color: #9a8070; }
+
     .save-slots-btn {
-      background: transparent; border: 1px solid #2a5a2a; color: #6aba6a;
-      font-size: 12px; letter-spacing: 2px; padding: 8px 16px;
-      cursor: pointer; font-family: inherit; transition: background .2s;
+      background: transparent; border: 1px solid #4a7a4a;
+      color: #8aca8a; font-size: 11px; letter-spacing: 1px;
+      padding: 6px 14px; cursor: pointer; font-family: inherit;
+      border-radius: 0; transition: background .2s, border-color .2s;
     }
-    .save-slots-btn:hover    { background: #0a200a; }
+    .save-slots-btn:hover    { background: #0a200a; border-color: #6aba6a; }
     .save-slots-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* 週曆主體：左側時間軸 + 右側七欄 */
+    /* ── 週曆 ── */
     .calendar-wrap {
-      display: flex;
-      overflow-x: auto;
-      margin: 16px 0;
-      border: 1px solid #2a1f1a;
-      user-select: none;
+      display: flex; flex-direction: column;
+      border: 1px solid #2a1f1a; overflow-x: auto;
     }
-
-    /* calendar-wrap 改為縱向 flex */
-    .calendar-wrap { flex-direction: column !important; overflow-x: auto; }
 
     /* header row：日期 + 時段塊 */
-    .cal-header-row {
-      display: flex;
-      flex-shrink: 0;
+    .cal-header-row { display: flex; flex-shrink: 0; border-bottom: 1px solid #2a1f1a; }
+    .cal-axis-spacer {
+      flex-shrink: 0; width: 42px;
+      background: #0e0a08; border-right: 1px solid #2a1f1a;
+    }
+    .cal-head-cols { display: flex; flex: 1; min-width: 0; }
+
+    .head-col {
+      flex: 1; min-width: 64px;
+      border-right: 1px solid #1a1410; background: #0e0a08;
+    }
+    .head-col:last-child { border-right: none; }
+    .head-date-row {
+      height: 30px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       border-bottom: 1px solid #2a1f1a;
     }
-    .time-axis-spacer {
-      flex-shrink: 0;
-      width: 44px;
-      border-right: 1px solid #2a1f1a;
-      background: #0e0a08;
-    }
+    .head-date { font-size: 10px; letter-spacing: 1px; color: #9a8f82; }
+    .head-day  { font-size: 9px; color: #9a8070; }
+    .head-slots { padding: 2px; min-height: 4px; }
 
-    /* body row：時間軸 + 時間格 */
-    .cal-body-row { display: flex; }
-
-    /* 日欄 slots 區（時段塊放在 header 下方） */
-    .day-col__slots { padding: 2px; }
-
-    /* 左側時間軸 */
-    .time-axis {
-      flex-shrink: 0;
-      width: 44px;
-      border-right: 1px solid #2a1f1a;
-    }
-    .time-axis__cell {
-      height: 28px;
-      display: flex; align-items: center; justify-content: flex-end;
-      padding-right: 6px;
-      font-size: 10px; color: #9a8070;
-      border-bottom: 1px solid #1a1410;
-      background: #0e0a08;
-    }
-
-    /* 日欄 */
-    .week-cols { display: flex; flex: 1; min-width: 0; }
-    .day-col   { flex: 1; min-width: 72px; border-right: 1px solid #1a1410; }
-    .day-col:last-child { border-right: none; }
-    .day-col__header {
-      height: 36px; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      background: #0e0a08; border-bottom: 1px solid #2a1f1a;
-    }
-    .day-col__header-date { font-size: 11px; letter-spacing: 1px; color: #9a8f82; }
-    .day-col__header-day  { font-size: 10px; color: #5a4a40; }
-
-    /* 已存在的時段塊（顯示在 header 下方） */
+    /* 已儲存時段塊 */
     .slot-block {
       background: #1a0808; border: 1px solid #5a1a1a;
-      padding: 4px 6px; margin-bottom: 3px; cursor: pointer;
-      font-size: 10px; color: #c87070; text-align: center;
-      transition: background .15s;
+      padding: 3px 5px; margin-bottom: 2px;
+      font-size: 9px; color: #c87070; text-align: center;
+      cursor: pointer; border-radius: 0;
+      transition: background .15s, border-color .15s;
     }
     .slot-block:hover { background: #2a0808; border-color: #8a2020; color: #e88080; }
-    .slot-block__time   { font-size: 11px; letter-spacing: 1px; margin-bottom: 2px; font-weight: 500; }
-    .slot-block__stats  { font-size: 9px; color: #8a5050; line-height: 1.6; }
-    .slot-block__hint   { font-size: 9px; color: #5a3030; margin-top: 2px; }
+    .slot-block__time { font-size: 10px; font-weight: 500; }
+    .slot-block__hint { font-size: 8px; color: #7a4040; }
 
-    .pending-block {
-      background: #3a0808; border: 1px dashed #aa3030;
-      padding: 4px 6px; margin-bottom: 3px;
-      font-size: 10px; color: #e08080; text-align: center;
+    /* 待儲存時段塊 */
+    .slot-block-pending {
+      background: #2a0808; border: 1px dashed #cc3333;
+      padding: 3px 5px; margin-bottom: 2px;
+      font-size: 9px; color: #e08080; text-align: center;
+      border-radius: 0;
     }
-    .pending-block__time { font-size: 11px; letter-spacing: 1px; margin-bottom: 2px; font-weight: 500; }
-    .pending-block__hint { font-size: 9px; color: #aa6060; }
+    .slot-block-pending__time { font-size: 10px; font-weight: 500; }
+    .slot-block-pending__hint { font-size: 8px; color: #aa5050; }
 
-    /* 小時格 */
-    .day-hour {
-      height: 28px;
-      border-bottom: 1px solid #1a1410;
-      cursor: pointer; position: relative;
-      transition: background .1s;
+    /* body row：時間格 */
+    .cal-body-row { display: flex; }
+    .time-axis { flex-shrink: 0; width: 42px; border-right: 1px solid #2a1f1a; }
+    .time-axis__cell {
+      height: 28px; display: flex; align-items: center;
+      justify-content: flex-end; padding-right: 5px;
+      font-size: 9px; color: #9a8070;
+      border-bottom: 1px solid #1a1410; background: #0e0a08;
     }
-    .day-hour:hover       { background: #16120e; }
-    .day-hour.is-in-range { background: #5a0f0f; border-color: #cc3333; }
-    .day-hour.is-pending  { background: #5a0f0f; }
-
-    /* ── Stats Bar ── */
-    .stats-bar {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 8px; margin-bottom: 20px;
+    .cal-body-cols { display: flex; flex: 1; min-width: 0; }
+    .body-col {
+      flex: 1; min-width: 64px;
+      border-right: 1px solid #1a1410;
     }
-    .stat-card { background: #16120e; border: 1px solid #2a1f1a; padding: 12px; text-align: center; }
-    .stat-card__value { font-size: 22px; color: #9A0E0E; margin-bottom: 4px; }
-    .stat-card__label { font-size: 10px; letter-spacing: 2px; color: #6a5a50; }
+    .body-col:last-child { border-right: none; }
+    .hour-cell {
+      height: 28px; border-bottom: 1px solid #1a1410;
+      cursor: pointer; transition: background .1s;
+    }
+    .hour-cell:hover       { background: #16120e; }
+    .hour-cell.is-in-range { background: #5a0f0f; border-color: #cc3333; }
 
-    /* ── Booking List ── */
+    .cal-hint { font-size: 10px; color: #9a8070; margin-top: 8px; line-height: 1.8; }
+
+    /* ── 預約紀錄 ── */
     .month-select {
-      background: #0e0a08; border: 1px solid #3a2a22; color: #e8e0d5;
-      font-size: 12px; padding: 7px 10px; font-family: inherit;
-      cursor: pointer; outline: none; -webkit-appearance: none; border-radius: 0;
+      background: #0e0a08; border: 1px solid #6a5a50;
+      color: #9a8f82; font-size: 12px; padding: 6px 10px;
+      font-family: inherit; cursor: pointer;
+      border-radius: 0; outline: none;
+      transition: border-color .2s;
     }
-    .booking-item { border: 1px solid #2a1f1a; margin-bottom: 8px; overflow: hidden; }
-    .booking-item__summary {
-      display: grid; grid-template-columns: auto 1fr auto auto;
-      gap: 10px; align-items: center;
-      padding: 12px 14px; cursor: pointer; background: #0e0a08; transition: background .2s;
+    .month-select:hover { border-color: #9a8f82; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px; margin: 10px 0;
     }
-    .booking-item__summary:hover { background: #16120e; }
-    .booking-id     { font-size: 10px; color: #5a4a40; letter-spacing: 1px; }
-    .booking-course { font-size: 12px; margin-bottom: 2px; }
-    .booking-time   { font-size: 11px; color: #9a8f82; }
-    .booking-amount { font-size: 13px; color: #9A0E0E; white-space: nowrap; }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .stat-card {
+      background: #16120e; border: 1px solid #2a1f1a;
+      padding: 10px; text-align: center;
+    }
+    .stat-card__value { font-size: 20px; color: #9A0E0E; margin-bottom: 3px; }
+    .stat-card__label { font-size: 9px; letter-spacing: 2px; color: #9a8070; }
+
+    .booking-item { border: 1px solid #2a1f1a; margin-bottom: 6px; overflow: hidden; }
+    .booking-summary {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 8px; align-items: center;
+      padding: 10px 12px; cursor: pointer;
+      background: #0e0a08; transition: background .2s;
+    }
+    .booking-summary:hover { background: #16120e; }
+
+    @media (max-width: 480px) {
+      .booking-summary {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+      }
+      .booking-id { display: none; }
+      .booking-amount { grid-row: 2; grid-column: 2; }
+      .booking-status { grid-row: 1; grid-column: 2; }
+    }
+
+    .booking-id     { font-size: 9px; color: #9a8070; letter-spacing: 1px; }
+    .booking-main   { min-width: 0; }
+    .booking-course { font-size: 11px; color: #e8e0d5; margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .booking-time   { font-size: 10px; color: #9a8070; }
+    .booking-amount { font-size: 12px; color: #9A0E0E; white-space: nowrap; }
     .booking-status {
-      font-size: 10px; letter-spacing: 1px; padding: 3px 8px;
-      border: 1px solid; white-space: nowrap;
+      font-size: 9px; letter-spacing: 1px;
+      padding: 2px 7px; border: 1px solid; white-space: nowrap;
     }
     .status-pending   { border-color: #5a4a20; color: #9a8040; }
     .status-approved  { border-color: #2a4a2a; color: #6a9a6a; }
     .status-cancelled { border-color: #3a2a2a; color: #5a4a4a; }
-    .booking-item__detail {
-      display: none; padding: 14px;
+
+    .booking-detail {
+      display: none; padding: 12px;
       border-top: 1px solid #1a1410; background: #0e0a08;
     }
-    .booking-item.is-open .booking-item__detail { display: block; }
     .detail-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 8px 16px; margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px 14px; margin-bottom: 12px;
     }
-    .detail-item__label { font-size: 10px; color: #5a4a40; letter-spacing: 1px; margin-bottom: 2px; }
-    .detail-item__value { font-size: 12px; }
+    @media (max-width: 480px) {
+      .detail-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .detail-label { font-size: 9px; color: #9a8070; letter-spacing: 1px; margin-bottom: 2px; }
+    .detail-value { font-size: 11px; color: #e8e0d5; }
+
     .btn-cancel {
-      background: none; border: 1px solid #3d1010; color: #9a5050;
-      font-size: 11px; letter-spacing: 2px; padding: 8px 16px;
-      cursor: pointer; font-family: inherit; transition: background .2s;
+      background: none; border: 1px solid #5a2020;
+      color: #9a6060; font-size: 10px; letter-spacing: 1px;
+      padding: 7px 14px; cursor: pointer; font-family: inherit;
+      border-radius: 0; transition: background .2s, border-color .2s, color .2s;
     }
-    .btn-cancel:hover    { background: #1a0808; color: #c44; border-color: #5a1010; }
+    .btn-cancel:hover    { background: #1a0808; border-color: #8a2020; color: #c44; }
     .btn-cancel:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* ── Course Editor ── */
-    .course-editor-list { display: flex; flex-direction: column; gap: 12px; }
-    .course-editor-item {
-      border: 1px solid #2a1f1a; overflow: hidden;
+    .empty-state {
+      text-align: center; padding: 40px;
+      color: #9a8070; font-size: 11px; letter-spacing: 2px;
     }
-    .course-editor-item__header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px; background: #0e0a08; cursor: pointer;
-      transition: background .2s;
-    }
-    .course-editor-item__header:hover { background: #16120e; }
-    .course-editor-item__title { font-size: 13px; }
-    .course-editor-item__id    { font-size: 11px; color: #5a4a40; }
-    .course-editor-item__body  { display: none; padding: 16px; border-top: 1px solid #1a1410; }
-    .course-editor-item.is-open .course-editor-item__body { display: block; }
 
-    .field-group { margin-bottom: 16px; }
+    /* ── 課程編輯 ── */
+    .course-item { border: 1px solid #2a1f1a; margin-bottom: 8px; overflow: hidden; }
+    .course-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 11px 14px; cursor: pointer;
+      background: #0e0a08; transition: background .2s;
+    }
+    .course-header:hover { background: #16120e; }
+    .course-header__title { font-size: 12px; color: #e8e0d5; }
+    .course-header__id    { font-size: 10px; color: #9a8070; }
+    .course-body { display: none; padding: 16px; border-top: 1px solid #1a1410; }
+
+    .field-group { margin-bottom: 14px; }
     .field-label {
-      display: block; font-size: 10px; letter-spacing: 3px; color: #6a5a50;
-      margin-bottom: 6px; text-transform: uppercase;
+      display: block; font-size: 9px; letter-spacing: 2px;
+      color: #9a8070; margin-bottom: 5px; text-transform: uppercase;
     }
     .field-input, .field-textarea {
-      display: block; width: 100%; background: #0e0a08;
-      border: 1px solid #3a2a22; color: #e8e0d5;
-      font-family: inherit; font-size: 13px; padding: 10px 12px;
-      outline: none; border-radius: 0; -webkit-appearance: none; transition: border-color .2s;
+      display: block; width: 100%;
+      background: #0e0a08; border: 1px solid #4a3a30;
+      color: #e8e0d5; font-family: inherit;
+      font-size: 13px; padding: 9px 12px;
+      outline: none; border-radius: 0;
+      transition: border-color .2s;
     }
-    .field-input:focus, .field-textarea:focus { border-color: #6a3020; }
-    .field-textarea { resize: vertical; min-height: 100px; }
-    .price-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .price-row .field-group { margin-bottom: 0; }
+    .field-input:focus, .field-textarea:focus { border-color: #7a5040; }
+    .field-textarea { resize: vertical; min-height: 80px; }
+
+    .price-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 480px) {
+      .price-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
     .btn-save-course {
-      background: transparent; border: 1px solid #2a5a2a; color: #6aba6a;
-      font-size: 12px; letter-spacing: 2px; padding: 10px 20px;
-      cursor: pointer; font-family: inherit; transition: background .2s; margin-top: 8px;
+      background: transparent; border: 1px solid #4a7a4a;
+      color: #8aca8a; font-size: 11px; letter-spacing: 1px;
+      padding: 9px 18px; cursor: pointer; font-family: inherit;
+      border-radius: 0; transition: background .2s;
+      margin-top: 4px;
     }
     .btn-save-course:hover    { background: #0a200a; }
     .btn-save-course:disabled { opacity: .4; cursor: not-allowed; }
-    .save-result { font-size: 11px; margin-top: 8px; min-height: 16px; }
-    .save-result.ok  { color: #6aba6a; }
+    .save-result { font-size: 10px; color: #9a8070; margin-top: 6px; min-height: 16px; }
+    .save-result.ok { color: #6aba6a; }
     .save-result.err { color: #c44; }
 
-    /* ── Misc ── */
-    .empty-state    { text-align: center; padding: 40px; color: #5a4a40; font-size: 12px; letter-spacing: 2px; }
-    .loading-indicator { text-align: center; padding: 30px; color: #5a4a40; font-size: 12px; letter-spacing: 2px; }
+    /* ── Toast ── */
     .toast {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%);
       background: #1e0c0c; border: 1px solid #5a1010; color: #e8e0d5;
-      padding: 10px 20px; font-size: 12px; letter-spacing: 1px;
+      padding: 10px 20px; font-size: 11px; letter-spacing: 1px;
       opacity: 0; transition: opacity .3s; pointer-events: none;
       white-space: nowrap; max-width: 90vw;
     }
     .toast.is-visible { opacity: 1; }
+
+    /* ── Loading ── */
+    .loading-indicator {
+      text-align: center; padding: 30px;
+      color: #9a8070; font-size: 11px; letter-spacing: 2px;
+    }
   </style>
 </head>
 <body>
 
-<!-- Login Page -->
+<!-- ── 登入頁 ── -->
 <div id="login-page">
   <div class="login-card">
     <span class="login-symbol">✦</span>
     <p class="login-title">後台管理</p>
-    <input id="login-pwd" class="login-input" type="password" placeholder="請輸入密碼">
-    <button class="login-btn" id="login-btn" onclick="doLogin()">登 入</button>
+    <input id="login-pwd" class="login-input" type="password" placeholder="請輸入密碼" autocomplete="current-password">
+    <button id="login-btn" class="login-btn" onclick="doLogin()">登 入</button>
     <p class="login-error" id="login-error"></p>
   </div>
 </div>
 
-<!-- App -->
+<!-- ── 主應用 ── -->
 <div id="app">
   <header class="app-header">
     <span class="app-brand">isroom 遺室｜後台管理</span>
     <button class="app-logout" onclick="doLogout()">登出</button>
   </header>
 
-  <div class="tab-bar">
+  <nav class="tab-bar">
     <button class="tab-btn is-active" onclick="switchTab('slots', this)">時段管理</button>
     <button class="tab-btn"           onclick="switchTab('bookings', this)">預約紀錄</button>
     <button class="tab-btn"           onclick="switchTab('courses', this)">課程編輯</button>
-  </div>
+  </nav>
 
-  <!-- Tab: 時段管理 -->
+  <!-- 時段管理 -->
   <div id="tab-slots" class="tab-panel is-active">
-    <div class="section-header">
+    <div class="row">
       <span class="section-title">開放時段設定</span>
       <div class="week-nav">
-        <button class="week-nav-btn" onclick="changeWeek(-1)">← 上週</button>
+        <button class="nav-btn" onclick="changeWeek(-1)">← 上週</button>
         <span class="week-label" id="week-label"></span>
-        <button class="week-nav-btn" onclick="changeWeek(1)">下週 →</button>
+        <button class="nav-btn" onclick="changeWeek(1)">下週 →</button>
       </div>
     </div>
-    <div class="section-header">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input id="max-cap-input" type="number" min="1" max="20" value="6"
-          style="width:56px;background:#0e0a08;border:1px solid #3a2a22;color:#e8e0d5;padding:6px;font-size:12px;text-align:center;border-radius:0;font-family:inherit">
-        <span style="font-size:11px;color:#5a4a40">人上限</span>
-        <button class="save-slots-btn" id="save-slots-btn" onclick="saveNewSlots()">✦ 儲存新增時段</button>
+    <div class="row" style="margin-bottom:12px">
+      <div class="toolbar">
+        <div class="cap-group">
+          <input id="cap-input" class="cap-input" type="number" value="6" min="1" max="20">
+          <span class="cap-label">每個時段人數上限</span>
+        </div>
+        <button id="save-slots-btn" class="save-slots-btn" onclick="saveNewSlots()">✦ 儲存新增時段</button>
       </div>
     </div>
-
-    <!-- 待儲存摘要（週曆上方） -->
-    <div id="pending-summary" style="display:none;margin:0 0 10px;padding:10px 14px;border:1px dashed #aa3030;background:#2a0808;font-size:12px;color:#e08080;line-height:1.8"></div>
-
-    <!-- 週曆（縱向：header-row + body-row）-->
-    <div class="calendar-wrap" id="calendar-wrap" style="display:flex;flex-direction:column;border:1px solid #2a1f1a;overflow-x:auto;"></div>
-
-    <p style="font-size:11px;color:#5a4a40;line-height:1.8">
+    <div class="calendar-wrap" id="calendar-wrap"></div>
+    <p class="cal-hint">
       在格子上按住拖曳選取時間範圍，放開後按「儲存新增時段」；已設定的時段點擊可刪除。<br>
       設定「10:00–17:00」代表開放整個區間，前台自動產生每小時可選的開始時間。
     </p>
   </div>
 
-  <!-- Tab: 預約紀錄 -->
+  <!-- 預約紀錄 -->
   <div id="tab-bookings" class="tab-panel">
-    <div class="section-header">
+    <div class="row">
       <span class="section-title">預約紀錄</span>
       <select id="month-select" class="month-select" onchange="filterByMonth()"></select>
     </div>
-    <div class="stats-bar">
+    <div class="stats-grid">
       <div class="stat-card"><p class="stat-card__value" id="stat-pending">—</p><p class="stat-card__label">待確認</p></div>
       <div class="stat-card"><p class="stat-card__value" id="stat-approved">—</p><p class="stat-card__label">已核准</p></div>
       <div class="stat-card"><p class="stat-card__value" id="stat-total">—</p><p class="stat-card__label">總筆數</p></div>
@@ -360,772 +417,10 @@
     <div id="booking-list"><p class="loading-indicator">載入中⋯</p></div>
   </div>
 
-  <!-- Tab: 課程編輯 -->
+  <!-- 課程編輯 -->
   <div id="tab-courses" class="tab-panel">
-    <div class="section-header">
-      <span class="section-title">課程內容編輯</span>
-    </div>
-    <div id="course-editor-list" class="course-editor-list">
-      <p class="loading-indicator">載入中⋯</p>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-// ============================================================
-//  設定：將此 URL 換成你的 Apps Script Web App URL
-// ============================================================
-const API = '<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>後台管理｜isroom 遺室</title>
-  <style>
-    /* ── Reset & Base ── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      overflow-x: hidden; max-width: 100%;
-      background: #0a0806; color: #e8e0d5;
-      font-family: -apple-system, 'Noto Sans TC', sans-serif;
-      font-size: 14px; line-height: 1.6;
-    }
-
-    /* ── Login ── */
-    #login-page {
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center; padding: 20px;
-    }
-    .login-card {
-      background: #16120e; border: 1px solid #3d1010;
-      padding: 40px 32px; width: 100%; max-width: 360px; text-align: center;
-    }
-    .login-symbol { font-size: 28px; margin-bottom: 16px; display: block; }
-    .login-title  { font-size: 16px; letter-spacing: 3px; margin-bottom: 24px; font-weight: 400; }
-    .login-input {
-      display: block; width: 100%; background: #0e0a08;
-      border: 1px solid #3a2a22; color: #e8e0d5;
-      font-size: 15px; padding: 14px; margin-bottom: 16px;
-      outline: none; border-radius: 0; font-family: inherit; -webkit-appearance: none;
-    }
-    .login-input:focus { border-color: #6a3020; }
-    .login-btn {
-      display: block; width: 100%; background: transparent;
-      border: 1px solid #6a2a20; color: #e8e0d5;
-      font-size: 13px; letter-spacing: 3px; padding: 16px;
-      cursor: pointer; font-family: inherit; border-radius: 0; -webkit-appearance: none;
-    }
-    .login-btn:hover    { background: #1e0c0c; }
-    .login-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .login-error { font-size: 12px; color: #c44; margin-top: 12px; min-height: 18px; }
-
-    /* ── App Shell ── */
-    #app { display: none; }
-    .app-header {
-      background: #16120e; border-bottom: 1px solid #2a1f1a;
-      padding: 14px 20px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .app-brand  { font-size: 13px; letter-spacing: 3px; color: #9a8f82; }
-    .app-logout {
-      background: none; border: 1px solid #3a2a22; color: #6a5a50;
-      font-size: 11px; letter-spacing: 2px; padding: 6px 12px;
-      cursor: pointer; font-family: inherit;
-    }
-    .app-logout:hover { border-color: #5a2a20; color: #9a8f82; }
-
-    /* ── Tabs ── */
-    .tab-bar { display: flex; border-bottom: 1px solid #2a1f1a; background: #0e0a08; overflow-x: auto; }
-    .tab-btn {
-      flex-shrink: 0; background: none; border: none; color: #6a5a50;
-      font-size: 12px; letter-spacing: 2px; padding: 14px 18px;
-      cursor: pointer; font-family: inherit; border-bottom: 2px solid transparent;
-      transition: color .2s; white-space: nowrap;
-    }
-    .tab-btn.is-active { color: #e8e0d5; border-bottom-color: #8a2a20; }
-
-    /* ── Content ── */
-    .tab-panel { display: none; padding: 20px; }
-    .tab-panel.is-active { display: block; }
-    .section-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
-    }
-    .section-title { font-size: 12px; letter-spacing: 3px; color: #9a8f82; }
-
-    /* ── Week Calendar ── */
-    .week-nav { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .week-nav-btn {
-      background: none; border: 1px solid #3a2a22; color: #9a8f82;
-      font-size: 12px; padding: 6px 12px; cursor: pointer; font-family: inherit;
-    }
-    .week-nav-btn:hover { border-color: #5a2a20; color: #e8e0d5; }
-    .week-label { font-size: 12px; color: #6a5a50; letter-spacing: 1px; }
-    .save-slots-btn {
-      background: transparent; border: 1px solid #2a5a2a; color: #6aba6a;
-      font-size: 12px; letter-spacing: 2px; padding: 8px 16px;
-      cursor: pointer; font-family: inherit; transition: background .2s;
-    }
-    .save-slots-btn:hover    { background: #0a200a; }
-    .save-slots-btn:disabled { opacity: .4; cursor: not-allowed; }
-
-    /* 週曆主體：左側時間軸 + 右側七欄 */
-    .calendar-wrap {
-      display: flex;
-      overflow-x: auto;
-      margin: 16px 0;
-      border: 1px solid #2a1f1a;
-      user-select: none;
-    }
-
-    /* calendar-wrap 改為縱向 flex */
-    .calendar-wrap { flex-direction: column !important; overflow-x: auto; }
-
-    /* header row：日期 + 時段塊 */
-    .cal-header-row {
-      display: flex;
-      flex-shrink: 0;
-      border-bottom: 1px solid #2a1f1a;
-    }
-    .time-axis-spacer {
-      flex-shrink: 0;
-      width: 44px;
-      border-right: 1px solid #2a1f1a;
-      background: #0e0a08;
-    }
-
-    /* body row：時間軸 + 時間格 */
-    .cal-body-row { display: flex; }
-
-    /* 日欄 slots 區（時段塊放在 header 下方） */
-    .day-col__slots { padding: 2px; }
-
-    /* 左側時間軸 */
-    .time-axis {
-      flex-shrink: 0;
-      width: 44px;
-      border-right: 1px solid #2a1f1a;
-    }
-    .time-axis__cell {
-      height: 28px;
-      display: flex; align-items: center; justify-content: flex-end;
-      padding-right: 6px;
-      font-size: 10px; color: #9a8070;
-      border-bottom: 1px solid #1a1410;
-      background: #0e0a08;
-    }
-
-    /* 日欄 */
-    .week-cols { display: flex; flex: 1; min-width: 0; }
-    .day-col   { flex: 1; min-width: 72px; border-right: 1px solid #1a1410; }
-    .day-col:last-child { border-right: none; }
-    .day-col__header {
-      height: 36px; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      background: #0e0a08; border-bottom: 1px solid #2a1f1a;
-    }
-    .day-col__header-date { font-size: 11px; letter-spacing: 1px; color: #9a8f82; }
-    .day-col__header-day  { font-size: 10px; color: #5a4a40; }
-
-    /* 已存在的時段塊（顯示在 header 下方） */
-    .slot-block {
-      background: #1a0808; border: 1px solid #5a1a1a;
-      padding: 4px 6px; margin-bottom: 3px; cursor: pointer;
-      font-size: 10px; color: #c87070; text-align: center;
-      transition: background .15s;
-    }
-    .slot-block:hover { background: #2a0808; border-color: #8a2020; color: #e88080; }
-    .slot-block__time   { font-size: 11px; letter-spacing: 1px; margin-bottom: 2px; font-weight: 500; }
-    .slot-block__stats  { font-size: 9px; color: #8a5050; line-height: 1.6; }
-    .slot-block__hint   { font-size: 9px; color: #5a3030; margin-top: 2px; }
-
-    .pending-block {
-      background: #3a0808; border: 1px dashed #aa3030;
-      padding: 4px 6px; margin-bottom: 3px;
-      font-size: 10px; color: #e08080; text-align: center;
-    }
-    .pending-block__time { font-size: 11px; letter-spacing: 1px; margin-bottom: 2px; font-weight: 500; }
-    .pending-block__hint { font-size: 9px; color: #aa6060; }
-
-    /* 小時格 */
-    .day-hour {
-      height: 28px;
-      border-bottom: 1px solid #1a1410;
-      cursor: pointer; position: relative;
-      transition: background .1s;
-    }
-    .day-hour:hover       { background: #16120e; }
-    .day-hour.is-in-range { background: #5a0f0f; border-color: #cc3333; }
-    .day-hour.is-pending  { background: #5a0f0f; }
-
-    /* ── Stats Bar ── */
-    .stats-bar {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 8px; margin-bottom: 20px;
-    }
-    .stat-card { background: #16120e; border: 1px solid #2a1f1a; padding: 12px; text-align: center; }
-    .stat-card__value { font-size: 22px; color: #9A0E0E; margin-bottom: 4px; }
-    .stat-card__label { font-size: 10px; letter-spacing: 2px; color: #6a5a50; }
-
-    /* ── Booking List ── */
-    .month-select {
-      background: #0e0a08; border: 1px solid #3a2a22; color: #e8e0d5;
-      font-size: 12px; padding: 7px 10px; font-family: inherit;
-      cursor: pointer; outline: none; -webkit-appearance: none; border-radius: 0;
-    }
-    .booking-item { border: 1px solid #2a1f1a; margin-bottom: 8px; overflow: hidden; }
-    .booking-item__summary {
-      display: grid; grid-template-columns: auto 1fr auto auto;
-      gap: 10px; align-items: center;
-      padding: 12px 14px; cursor: pointer; background: #0e0a08; transition: background .2s;
-    }
-    .booking-item__summary:hover { background: #16120e; }
-    .booking-id     { font-size: 10px; color: #5a4a40; letter-spacing: 1px; }
-    .booking-course { font-size: 12px; margin-bottom: 2px; }
-    .booking-time   { font-size: 11px; color: #9a8f82; }
-    .booking-amount { font-size: 13px; color: #9A0E0E; white-space: nowrap; }
-    .booking-status {
-      font-size: 10px; letter-spacing: 1px; padding: 3px 8px;
-      border: 1px solid; white-space: nowrap;
-    }
-    .status-pending   { border-color: #5a4a20; color: #9a8040; }
-    .status-approved  { border-color: #2a4a2a; color: #6a9a6a; }
-    .status-cancelled { border-color: #3a2a2a; color: #5a4a4a; }
-    .booking-item__detail {
-      display: none; padding: 14px;
-      border-top: 1px solid #1a1410; background: #0e0a08;
-    }
-    .booking-item.is-open .booking-item__detail { display: block; }
-    .detail-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 8px 16px; margin-bottom: 14px;
-    }
-    .detail-item__label { font-size: 10px; color: #5a4a40; letter-spacing: 1px; margin-bottom: 2px; }
-    .detail-item__value { font-size: 12px; }
-    .btn-cancel {
-      background: none; border: 1px solid #3d1010; color: #9a5050;
-      font-size: 11px; letter-spacing: 2px; padding: 8px 16px;
-      cursor: pointer; font-family: inherit; transition: background .2s;
-    }
-    .btn-cancel:hover    { background: #1a0808; color: #c44; border-color: #5a1010; }
-    .btn-cancel:disabled { opacity: .4; cursor: not-allowed; }
-
-    /* ── Course Editor ── */
-    .course-editor-list { display: flex; flex-direction: column; gap: 12px; }
-    .course-editor-item {
-      border: 1px solid #2a1f1a; overflow: hidden;
-    }
-    .course-editor-item__header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px; background: #0e0a08; cursor: pointer;
-      transition: background .2s;
-    }
-    .course-editor-item__header:hover { background: #16120e; }
-    .course-editor-item__title { font-size: 13px; }
-    .course-editor-item__id    { font-size: 11px; color: #5a4a40; }
-    .course-editor-item__body  { display: none; padding: 16px; border-top: 1px solid #1a1410; }
-    .course-editor-item.is-open .course-editor-item__body { display: block; }
-
-    .field-group { margin-bottom: 16px; }
-    .field-label {
-      display: block; font-size: 10px; letter-spacing: 3px; color: #6a5a50;
-      margin-bottom: 6px; text-transform: uppercase;
-    }
-    .field-input, .field-textarea {
-      display: block; width: 100%; background: #0e0a08;
-      border: 1px solid #3a2a22; color: #e8e0d5;
-      font-family: inherit; font-size: 13px; padding: 10px 12px;
-      outline: none; border-radius: 0; -webkit-appearance: none; transition: border-color .2s;
-    }
-    .field-input:focus, .field-textarea:focus { border-color: #6a3020; }
-    .field-textarea { resize: vertical; min-height: 100px; }
-    .price-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .price-row .field-group { margin-bottom: 0; }
-    .btn-save-course {
-      background: transparent; border: 1px solid #2a5a2a; color: #6aba6a;
-      font-size: 12px; letter-spacing: 2px; padding: 10px 20px;
-      cursor: pointer; font-family: inherit; transition: background .2s; margin-top: 8px;
-    }
-    .btn-save-course:hover    { background: #0a200a; }
-    .btn-save-course:disabled { opacity: .4; cursor: not-allowed; }
-    .save-result { font-size: 11px; margin-top: 8px; min-height: 16px; }
-    .save-result.ok  { color: #6aba6a; }
-    .save-result.err { color: #c44; }
-
-    /* ── Misc ── */
-    .empty-state    { text-align: center; padding: 40px; color: #5a4a40; font-size: 12px; letter-spacing: 2px; }
-    .loading-indicator { text-align: center; padding: 30px; color: #5a4a40; font-size: 12px; letter-spacing: 2px; }
-    .toast {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      background: #1e0c0c; border: 1px solid #5a1010; color: #e8e0d5;
-      padding: 10px 20px; font-size: 12px; letter-spacing: 1px;
-      opacity: 0; transition: opacity .3s; pointer-events: none;
-      white-space: nowrap; max-width: 90vw;
-    }
-    .toast.is-visible { opacity: 1; }
-  </style>
-</head>
-<body>
-
-<!-- Login Page -->
-<div id="login-page">
-  <div class="login-card">
-    <span class="login-symbol">✦</span>
-    <p class="login-title">後台管理</p>
-    <input id="login-pwd" class="login-input" type="password" placeholder="請輸入密碼">
-    <button class="login-btn" id="login-btn" onclick="doLogin()">登 入</button>
-    <p class="login-error" id="login-error"></p>
-  </div>
-</div>
-
-<!-- App -->
-<div id="app">
-  <header class="app-header">
-    <span class="app-brand">isroom 遺室｜後台管理</span>
-    <button class="app-logout" onclick="doLogout()">登出</button>
-  </header>
-
-  <div class="tab-bar">
-    <button class="tab-btn is-active" onclick="switchTab('slots', this)">時段管理</button>
-    <button class="tab-btn"           onclick="switchTab('bookings', this)">預約紀錄</button>
-    <button class="tab-btn"           onclick="switchTab('courses', this)">課程編輯</button>
-  </div>
-
-  <!-- Tab: 時段管理 -->
-  <div id="tab-slots" class="tab-panel is-active">
-    <div class="section-header">
-      <span class="section-title">開放時段設定</span>
-      <div class="week-nav">
-        <button class="week-nav-btn" onclick="changeWeek(-1)">← 上週</button>
-        <span class="week-label" id="week-label"></span>
-        <button class="week-nav-btn" onclick="changeWeek(1)">下週 →</button>
-      </div>
-    </div>
-    <div class="section-header">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input id="max-cap-input" type="number" min="1" max="20" value="6"
-          style="width:56px;background:#0e0a08;border:1px solid #3a2a22;color:#e8e0d5;padding:6px;font-size:12px;text-align:center;border-radius:0;font-family:inherit">
-        <span style="font-size:11px;color:#5a4a40">人上限</span>
-        <button class="save-slots-btn" id="save-slots-btn" onclick="saveNewSlots()">✦ 儲存新增時段</button>
-      </div>
-    </div>
-
-    <!-- 待儲存摘要（週曆上方） -->
-    <div id="pending-summary" style="display:none;margin:0 0 10px;padding:10px 14px;border:1px dashed #aa3030;background:#2a0808;font-size:12px;color:#e08080;line-height:1.8"></div>
-
-    <!-- 週曆（縱向：header-row + body-row）-->
-    <div class="calendar-wrap" id="calendar-wrap" style="display:flex;flex-direction:column;border:1px solid #2a1f1a;overflow-x:auto;"></div>
-
-    <p style="font-size:11px;color:#5a4a40;line-height:1.8">
-      在格子上按住拖曳選取時間範圍，放開後按「儲存新增時段」；已設定的時段點擊可刪除。<br>
-      設定「10:00–17:00」代表開放整個區間，前台自動產生每小時可選的開始時間。
-    </p>
-  </div>
-
-  <!-- Tab: 預約紀錄 -->
-  <div id="tab-bookings" class="tab-panel">
-    <div class="section-header">
-      <span class="section-title">預約紀錄</span>
-      <select id="month-select" class="month-select" onchange="filterByMonth()"></select>
-    </div>
-    <div class="stats-bar">
-      <div class="stat-card"><p class="stat-card__value" id="stat-pending">—</p><p class="stat-card__label">待確認</p></div>
-      <div class="stat-card"><p class="stat-card__value" id="stat-approved">—</p><p class="stat-card__label">已核准</p></div>
-      <div class="stat-card"><p class="stat-card__value" id="stat-total">—</p><p class="stat-card__label">總筆數</p></div>
-      <div class="stat-card"><p class="stat-card__value" id="stat-amount">—</p><p class="stat-card__label">已確認金額</p></div>
-    </div>
-    <div id="booking-list"><p class="loading-indicator">載入中⋯</p></div>
-  </div>
-
-  <!-- Tab: 課程編輯 -->
-  <div id="tab-courses" class="tab-panel">
-    <div class="section-header">
-      <span class="section-title">課程內容編輯</span>
-    </div>
-    <div id="course-editor-list" class="course-editor-list">
-      <p class="loading-indicator">載入中⋯</p>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-// ============================================================
-//  設定：將此 URL 換成你的 Apps Script Web App URL
-// ============================================================
-const API = '<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>後台管理｜isroom 遺室</title>
-  <style>
-    /* ── Reset & Base ── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      overflow-x: hidden; max-width: 100%;
-      background: #0a0806; color: #e8e0d5;
-      font-family: -apple-system, 'Noto Sans TC', sans-serif;
-      font-size: 14px; line-height: 1.6;
-    }
-
-    /* ── Login ── */
-    #login-page {
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center; padding: 20px;
-    }
-    .login-card {
-      background: #16120e; border: 1px solid #3d1010;
-      padding: 40px 32px; width: 100%; max-width: 360px; text-align: center;
-    }
-    .login-symbol { font-size: 28px; margin-bottom: 16px; display: block; }
-    .login-title  { font-size: 16px; letter-spacing: 3px; margin-bottom: 24px; font-weight: 400; }
-    .login-input {
-      display: block; width: 100%; background: #0e0a08;
-      border: 1px solid #3a2a22; color: #e8e0d5;
-      font-size: 15px; padding: 14px; margin-bottom: 16px;
-      outline: none; border-radius: 0; font-family: inherit; -webkit-appearance: none;
-    }
-    .login-input:focus { border-color: #6a3020; }
-    .login-btn {
-      display: block; width: 100%; background: transparent;
-      border: 1px solid #6a2a20; color: #e8e0d5;
-      font-size: 13px; letter-spacing: 3px; padding: 16px;
-      cursor: pointer; font-family: inherit; border-radius: 0; -webkit-appearance: none;
-    }
-    .login-btn:hover    { background: #1e0c0c; }
-    .login-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .login-error { font-size: 12px; color: #c44; margin-top: 12px; min-height: 18px; }
-
-    /* ── App Shell ── */
-    #app { display: none; }
-    .app-header {
-      background: #16120e; border-bottom: 1px solid #2a1f1a;
-      padding: 14px 20px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .app-brand  { font-size: 13px; letter-spacing: 3px; color: #9a8f82; }
-    .app-logout {
-      background: none; border: 1px solid #3a2a22; color: #6a5a50;
-      font-size: 11px; letter-spacing: 2px; padding: 6px 12px;
-      cursor: pointer; font-family: inherit;
-    }
-    .app-logout:hover { border-color: #5a2a20; color: #9a8f82; }
-
-    /* ── Tabs ── */
-    .tab-bar { display: flex; border-bottom: 1px solid #2a1f1a; background: #0e0a08; overflow-x: auto; }
-    .tab-btn {
-      flex-shrink: 0; background: none; border: none; color: #6a5a50;
-      font-size: 12px; letter-spacing: 2px; padding: 14px 18px;
-      cursor: pointer; font-family: inherit; border-bottom: 2px solid transparent;
-      transition: color .2s; white-space: nowrap;
-    }
-    .tab-btn.is-active { color: #e8e0d5; border-bottom-color: #8a2a20; }
-
-    /* ── Content ── */
-    .tab-panel { display: none; padding: 20px; }
-    .tab-panel.is-active { display: block; }
-    .section-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
-    }
-    .section-title { font-size: 12px; letter-spacing: 3px; color: #9a8f82; }
-
-    /* ── Week Calendar ── */
-    .week-nav { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .week-nav-btn {
-      background: none; border: 1px solid #3a2a22; color: #9a8f82;
-      font-size: 12px; padding: 6px 12px; cursor: pointer; font-family: inherit;
-    }
-    .week-nav-btn:hover { border-color: #5a2a20; color: #e8e0d5; }
-    .week-label { font-size: 12px; color: #6a5a50; letter-spacing: 1px; }
-    .save-slots-btn {
-      background: transparent; border: 1px solid #2a5a2a; color: #6aba6a;
-      font-size: 12px; letter-spacing: 2px; padding: 8px 16px;
-      cursor: pointer; font-family: inherit; transition: background .2s;
-    }
-    .save-slots-btn:hover    { background: #0a200a; }
-    .save-slots-btn:disabled { opacity: .4; cursor: not-allowed; }
-
-    /* 週曆主體：左側時間軸 + 右側七欄 */
-    .calendar-wrap {
-      display: flex;
-      overflow-x: auto;
-      margin: 16px 0;
-      border: 1px solid #2a1f1a;
-      user-select: none;
-    }
-
-    /* calendar-wrap 改為縱向 flex */
-    .calendar-wrap { flex-direction: column !important; overflow-x: auto; }
-
-    /* header row：日期 + 時段塊 */
-    .cal-header-row {
-      display: flex;
-      flex-shrink: 0;
-      border-bottom: 1px solid #2a1f1a;
-    }
-    .time-axis-spacer {
-      flex-shrink: 0;
-      width: 44px;
-      border-right: 1px solid #2a1f1a;
-      background: #0e0a08;
-    }
-
-    /* body row：時間軸 + 時間格 */
-    .cal-body-row { display: flex; }
-
-    /* 日欄 slots 區（時段塊放在 header 下方） */
-    .day-col__slots { padding: 2px; }
-
-    /* 左側時間軸 */
-    .time-axis {
-      flex-shrink: 0;
-      width: 44px;
-      border-right: 1px solid #2a1f1a;
-    }
-    .time-axis__cell {
-      height: 28px;
-      display: flex; align-items: center; justify-content: flex-end;
-      padding-right: 6px;
-      font-size: 10px; color: #9a8070;
-      border-bottom: 1px solid #1a1410;
-      background: #0e0a08;
-    }
-
-    /* 日欄 */
-    .week-cols { display: flex; flex: 1; min-width: 0; }
-    .day-col   { flex: 1; min-width: 72px; border-right: 1px solid #1a1410; }
-    .day-col:last-child { border-right: none; }
-    .day-col__header {
-      height: 36px; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      background: #0e0a08; border-bottom: 1px solid #2a1f1a;
-    }
-    .day-col__header-date { font-size: 11px; letter-spacing: 1px; color: #9a8f82; }
-    .day-col__header-day  { font-size: 10px; color: #5a4a40; }
-
-    /* 已存在的時段塊（顯示在 header 下方） */
-    .slot-block {
-      background: #1a0808; border: 1px solid #5a1a1a;
-      padding: 4px 6px; margin-bottom: 3px; cursor: pointer;
-      font-size: 10px; color: #c87070; text-align: center;
-      transition: background .15s;
-    }
-    .slot-block:hover { background: #2a0808; border-color: #8a2020; color: #e88080; }
-    .slot-block__time   { font-size: 11px; letter-spacing: 1px; margin-bottom: 2px; font-weight: 500; }
-    .slot-block__stats  { font-size: 9px; color: #8a5050; line-height: 1.6; }
-    .slot-block__hint   { font-size: 9px; color: #5a3030; margin-top: 2px; }
-
-    .pending-block {
-      background: #3a0808; border: 1px dashed #aa3030;
-      padding: 4px 6px; margin-bottom: 3px;
-      font-size: 10px; color: #e08080; text-align: center;
-    }
-    .pending-block__time { font-size: 11px; letter-spacing: 1px; margin-bottom: 2px; font-weight: 500; }
-    .pending-block__hint { font-size: 9px; color: #aa6060; }
-
-    /* 小時格 */
-    .day-hour {
-      height: 28px;
-      border-bottom: 1px solid #1a1410;
-      cursor: pointer; position: relative;
-      transition: background .1s;
-    }
-    .day-hour:hover       { background: #16120e; }
-    .day-hour.is-in-range { background: #5a0f0f; border-color: #cc3333; }
-    .day-hour.is-pending  { background: #5a0f0f; }
-
-    /* ── Stats Bar ── */
-    .stats-bar {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 8px; margin-bottom: 20px;
-    }
-    .stat-card { background: #16120e; border: 1px solid #2a1f1a; padding: 12px; text-align: center; }
-    .stat-card__value { font-size: 22px; color: #9A0E0E; margin-bottom: 4px; }
-    .stat-card__label { font-size: 10px; letter-spacing: 2px; color: #6a5a50; }
-
-    /* ── Booking List ── */
-    .month-select {
-      background: #0e0a08; border: 1px solid #3a2a22; color: #e8e0d5;
-      font-size: 12px; padding: 7px 10px; font-family: inherit;
-      cursor: pointer; outline: none; -webkit-appearance: none; border-radius: 0;
-    }
-    .booking-item { border: 1px solid #2a1f1a; margin-bottom: 8px; overflow: hidden; }
-    .booking-item__summary {
-      display: grid; grid-template-columns: auto 1fr auto auto;
-      gap: 10px; align-items: center;
-      padding: 12px 14px; cursor: pointer; background: #0e0a08; transition: background .2s;
-    }
-    .booking-item__summary:hover { background: #16120e; }
-    .booking-id     { font-size: 10px; color: #5a4a40; letter-spacing: 1px; }
-    .booking-course { font-size: 12px; margin-bottom: 2px; }
-    .booking-time   { font-size: 11px; color: #9a8f82; }
-    .booking-amount { font-size: 13px; color: #9A0E0E; white-space: nowrap; }
-    .booking-status {
-      font-size: 10px; letter-spacing: 1px; padding: 3px 8px;
-      border: 1px solid; white-space: nowrap;
-    }
-    .status-pending   { border-color: #5a4a20; color: #9a8040; }
-    .status-approved  { border-color: #2a4a2a; color: #6a9a6a; }
-    .status-cancelled { border-color: #3a2a2a; color: #5a4a4a; }
-    .booking-item__detail {
-      display: none; padding: 14px;
-      border-top: 1px solid #1a1410; background: #0e0a08;
-    }
-    .booking-item.is-open .booking-item__detail { display: block; }
-    .detail-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 8px 16px; margin-bottom: 14px;
-    }
-    .detail-item__label { font-size: 10px; color: #5a4a40; letter-spacing: 1px; margin-bottom: 2px; }
-    .detail-item__value { font-size: 12px; }
-    .btn-cancel {
-      background: none; border: 1px solid #3d1010; color: #9a5050;
-      font-size: 11px; letter-spacing: 2px; padding: 8px 16px;
-      cursor: pointer; font-family: inherit; transition: background .2s;
-    }
-    .btn-cancel:hover    { background: #1a0808; color: #c44; border-color: #5a1010; }
-    .btn-cancel:disabled { opacity: .4; cursor: not-allowed; }
-
-    /* ── Course Editor ── */
-    .course-editor-list { display: flex; flex-direction: column; gap: 12px; }
-    .course-editor-item {
-      border: 1px solid #2a1f1a; overflow: hidden;
-    }
-    .course-editor-item__header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px; background: #0e0a08; cursor: pointer;
-      transition: background .2s;
-    }
-    .course-editor-item__header:hover { background: #16120e; }
-    .course-editor-item__title { font-size: 13px; }
-    .course-editor-item__id    { font-size: 11px; color: #5a4a40; }
-    .course-editor-item__body  { display: none; padding: 16px; border-top: 1px solid #1a1410; }
-    .course-editor-item.is-open .course-editor-item__body { display: block; }
-
-    .field-group { margin-bottom: 16px; }
-    .field-label {
-      display: block; font-size: 10px; letter-spacing: 3px; color: #6a5a50;
-      margin-bottom: 6px; text-transform: uppercase;
-    }
-    .field-input, .field-textarea {
-      display: block; width: 100%; background: #0e0a08;
-      border: 1px solid #3a2a22; color: #e8e0d5;
-      font-family: inherit; font-size: 13px; padding: 10px 12px;
-      outline: none; border-radius: 0; -webkit-appearance: none; transition: border-color .2s;
-    }
-    .field-input:focus, .field-textarea:focus { border-color: #6a3020; }
-    .field-textarea { resize: vertical; min-height: 100px; }
-    .price-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .price-row .field-group { margin-bottom: 0; }
-    .btn-save-course {
-      background: transparent; border: 1px solid #2a5a2a; color: #6aba6a;
-      font-size: 12px; letter-spacing: 2px; padding: 10px 20px;
-      cursor: pointer; font-family: inherit; transition: background .2s; margin-top: 8px;
-    }
-    .btn-save-course:hover    { background: #0a200a; }
-    .btn-save-course:disabled { opacity: .4; cursor: not-allowed; }
-    .save-result { font-size: 11px; margin-top: 8px; min-height: 16px; }
-    .save-result.ok  { color: #6aba6a; }
-    .save-result.err { color: #c44; }
-
-    /* ── Misc ── */
-    .empty-state    { text-align: center; padding: 40px; color: #5a4a40; font-size: 12px; letter-spacing: 2px; }
-    .loading-indicator { text-align: center; padding: 30px; color: #5a4a40; font-size: 12px; letter-spacing: 2px; }
-    .toast {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      background: #1e0c0c; border: 1px solid #5a1010; color: #e8e0d5;
-      padding: 10px 20px; font-size: 12px; letter-spacing: 1px;
-      opacity: 0; transition: opacity .3s; pointer-events: none;
-      white-space: nowrap; max-width: 90vw;
-    }
-    .toast.is-visible { opacity: 1; }
-  </style>
-</head>
-<body>
-
-<!-- Login Page -->
-<div id="login-page">
-  <div class="login-card">
-    <span class="login-symbol">✦</span>
-    <p class="login-title">後台管理</p>
-    <input id="login-pwd" class="login-input" type="password" placeholder="請輸入密碼">
-    <button class="login-btn" id="login-btn" onclick="doLogin()">登 入</button>
-    <p class="login-error" id="login-error"></p>
-  </div>
-</div>
-
-<!-- App -->
-<div id="app">
-  <header class="app-header">
-    <span class="app-brand">isroom 遺室｜後台管理</span>
-    <button class="app-logout" onclick="doLogout()">登出</button>
-  </header>
-
-  <div class="tab-bar">
-    <button class="tab-btn is-active" onclick="switchTab('slots', this)">時段管理</button>
-    <button class="tab-btn"           onclick="switchTab('bookings', this)">預約紀錄</button>
-    <button class="tab-btn"           onclick="switchTab('courses', this)">課程編輯</button>
-  </div>
-
-  <!-- Tab: 時段管理 -->
-  <div id="tab-slots" class="tab-panel is-active">
-    <div class="section-header">
-      <span class="section-title">開放時段設定</span>
-      <div class="week-nav">
-        <button class="week-nav-btn" onclick="changeWeek(-1)">← 上週</button>
-        <span class="week-label" id="week-label"></span>
-        <button class="week-nav-btn" onclick="changeWeek(1)">下週 →</button>
-      </div>
-    </div>
-    <div class="section-header">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input id="max-cap-input" type="number" min="1" max="20" value="6"
-          style="width:56px;background:#0e0a08;border:1px solid #3a2a22;color:#e8e0d5;padding:6px;font-size:12px;text-align:center;border-radius:0;font-family:inherit">
-        <span style="font-size:11px;color:#5a4a40">人上限</span>
-        <button class="save-slots-btn" id="save-slots-btn" onclick="saveNewSlots()">✦ 儲存新增時段</button>
-      </div>
-    </div>
-
-    <!-- 待儲存摘要（週曆上方） -->
-    <div id="pending-summary" style="display:none;margin:0 0 10px;padding:10px 14px;border:1px dashed #aa3030;background:#2a0808;font-size:12px;color:#e08080;line-height:1.8"></div>
-
-    <!-- 週曆（縱向：header-row + body-row）-->
-    <div class="calendar-wrap" id="calendar-wrap" style="display:flex;flex-direction:column;border:1px solid #2a1f1a;overflow-x:auto;"></div>
-
-    <p style="font-size:11px;color:#5a4a40;line-height:1.8">
-      在格子上按住拖曳選取時間範圍，放開後按「儲存新增時段」；已設定的時段點擊可刪除。<br>
-      設定「10:00–17:00」代表開放整個區間，前台自動產生每小時可選的開始時間。
-    </p>
-  </div>
-
-  <!-- Tab: 預約紀錄 -->
-  <div id="tab-bookings" class="tab-panel">
-    <div class="section-header">
-      <span class="section-title">預約紀錄</span>
-      <select id="month-select" class="month-select" onchange="filterByMonth()"></select>
-    </div>
-    <div class="stats-bar">
-      <div class="stat-card"><p class="stat-card__value" id="stat-pending">—</p><p class="stat-card__label">待確認</p></div>
-      <div class="stat-card"><p class="stat-card__value" id="stat-approved">—</p><p class="stat-card__label">已核准</p></div>
-      <div class="stat-card"><p class="stat-card__value" id="stat-total">—</p><p class="stat-card__label">總筆數</p></div>
-      <div class="stat-card"><p class="stat-card__value" id="stat-amount">—</p><p class="stat-card__label">已確認金額</p></div>
-    </div>
-    <div id="booking-list"><p class="loading-indicator">載入中⋯</p></div>
-  </div>
-
-  <!-- Tab: 課程編輯 -->
-  <div id="tab-courses" class="tab-panel">
-    <div class="section-header">
-      <span class="section-title">課程內容編輯</span>
-    </div>
-    <div id="course-editor-list" class="course-editor-list">
-      <p class="loading-indicator">載入中⋯</p>
-    </div>
+    <div class="row"><span class="section-title">課程內容編輯</span></div>
+    <div id="course-list"><p class="loading-indicator">載入中⋯</p></div>
   </div>
 </div>
 
@@ -1138,13 +433,21 @@ const API = '<!DOCTYPE html>
 const API = 'https://script.google.com/macros/s/AKfycbwc05jYhzbGPGNAJJv0kcBqx-22XHLB3pGXKCUShYAUxQBwBvlDwy7AcvuTcRPO3y2ftg/exec';
 
 // ── 常數 ─────────────────────────────────────────────────────
-const DAY_NAMES    = ['日', '一', '二', '三', '四', '五', '六'];
-const HOURS        = Array.from({ length: 13 }, (_, i) => i + 9); // 09:00–21:00
-const COURSE_HOURS = 3;
+const DAY_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
+const HOURS     = Array.from({ length: 13 }, (_, i) => i + 9); // 09:00–21:00
+
+// ── State ────────────────────────────────────────────────────
+let sessionToken  = localStorage.getItem('admin_token');
+let weekOffset    = 0;
+let weekSlots     = [];
+let pendingCells  = {};   // { 'yyyy/mm/dd': { s: startH, e: endH } }
+let dragState     = null;
+let allBookings   = [];
+let allTemplates  = [];
+let selectedMonth = '';
+let toastTimer    = null;
 
 // ── Auth ─────────────────────────────────────────────────────
-let sessionToken = localStorage.getItem('admin_token');
-
 async function doLogin() {
   const pwd = document.getElementById('login-pwd').value;
   const btn = document.getElementById('login-btn');
@@ -1152,7 +455,7 @@ async function doLogin() {
   if (!pwd) return;
   btn.disabled = true; btn.textContent = '驗證中⋯'; err.textContent = '';
   try {
-    const res = await post({ action: 'login', password: pwd });
+    const res = await apiPost({ action: 'login', password: pwd });
     if (!res.success) throw new Error(res.message);
     sessionToken = res.token;
     localStorage.setItem('admin_token', sessionToken);
@@ -1164,46 +467,15 @@ async function doLogin() {
 }
 
 async function doLogout() {
-  await post({ action: 'logout', token: sessionToken });
+  try { await apiPost({ action: 'logout', token: sessionToken }); } catch (_) {}
   localStorage.removeItem('admin_token');
   sessionToken = null;
   document.getElementById('app').style.display        = 'none';
   document.getElementById('login-page').style.display = 'flex';
-}
-
-function showApp() {
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('app').style.display        = 'block';
-  initWeekGrid();
-  loadBookings();
-  loadCourses();
-}
-
-// ── 時段管理 state（必須在 showApp 呼叫前宣告）────────────────
-let weekOffset   = 0;
-let weekSlots    = [];
-let pendingCells = {};
-let dragState    = null;
-
-// ── 預約紀錄 state ───────────────────────────────────────────
-let allBookings   = [];
-let selectedMonth = '';
-
-// ── 課程 state ───────────────────────────────────────────────
-let allTemplates = [];
-
-if (sessionToken) showApp();
-
-document.getElementById('login-pwd').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
-
-// ── API ──────────────────────────────────────────────────────
-async function post(data) {
-  const res = await fetch(API, { method: 'POST', body: JSON.stringify(data) });
-  const d   = await res.json();
-  if (d.message === 'SESSION_EXPIRED') { handleSessionExpired(); throw new Error('SESSION_EXPIRED'); }
-  return d;
+  document.getElementById('login-error').textContent  = '';
+  document.getElementById('login-pwd').value          = '';
+  document.getElementById('login-btn').textContent    = '登 入';
+  document.getElementById('login-btn').disabled       = false;
 }
 
 function handleSessionExpired() {
@@ -1214,6 +486,38 @@ function handleSessionExpired() {
   document.getElementById('login-error').textContent  = '登入已過期，請重新登入';
 }
 
+function showApp() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').style.display        = 'block';
+  initWeekCalendar();
+  loadBookings();
+  loadCourses();
+}
+
+// 自動登入（有 token 時）
+if (sessionToken) showApp();
+
+document.getElementById('login-pwd').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ── API ──────────────────────────────────────────────────────
+async function apiPost(data) {
+  const res = await fetch(API, { method: 'POST', body: JSON.stringify(data) });
+  const d   = await res.json();
+  if (d.message === 'SESSION_EXPIRED') { handleSessionExpired(); throw new Error('SESSION_EXPIRED'); }
+  return d;
+}
+
+// ── Toast ────────────────────────────────────────────────────
+function showToast(msg, duration = 2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('is-visible');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('is-visible'), duration);
+}
+
 // ── Tabs ─────────────────────────────────────────────────────
 function switchTab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('is-active'));
@@ -1222,23 +526,11 @@ function switchTab(name, btn) {
   btn.classList.add('is-active');
 }
 
-// ── Toast ────────────────────────────────────────────────────
-let toastTimer = null;
-function showToast(msg, duration) {
-  duration = duration || 2500;
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('is-visible');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('is-visible'), duration);
-}
-
 // ══════════════════════════════════════════════════════════════
 //  時段管理
 // ══════════════════════════════════════════════════════════════
 
 function getWeekDates(offset) {
-  offset = offset || 0;
   const today  = new Date();
   const dow    = today.getDay();
   const monday = new Date(today);
@@ -1251,152 +543,123 @@ function getWeekDates(offset) {
 }
 
 function fmtDate(d) {
-  const y  = d.getFullYear();
-  const m  = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return y + '/' + m + '/' + dd;
+  return d.getFullYear() + '/' +
+    String(d.getMonth() + 1).padStart(2, '0') + '/' +
+    String(d.getDate()).padStart(2, '0');
 }
 
 function changeWeek(dir) {
   weekOffset += dir;
   pendingCells = {};
-  initWeekGrid();
+  renderCalendar();
 }
 
-async function initWeekGrid() {
-  const dates = getWeekDates(weekOffset);
-  document.getElementById('week-label').textContent =
-    fmtDate(dates[0]) + ' – ' + fmtDate(dates[6]);
-
+async function initWeekCalendar() {
   try {
     const r = await fetch(API + '?action=getSlots');
     const d = await r.json();
     weekSlots = d.slots || [];
-  } catch (e) { weekSlots = []; }
-
-  renderCalendar(dates);
+  } catch (_) { weekSlots = []; }
+  renderCalendar();
 }
 
-function renderCalendar(dates) {
-  const wrap = document.getElementById('calendar-wrap');
+function renderCalendar() {
+  const dates = getWeekDates(weekOffset);
+  document.getElementById('week-label').textContent =
+    fmtDate(dates[0]) + ' – ' + fmtDate(dates[6]);
 
-  // 策略：calendar-wrap 改為 flex-column
-  // 第一行：header-row（日期 + 時段塊，同一個 flex 列，跟下方時間格完全對齊）
-  // 第二行：body-row（時間軸 + 時間格，可捲動）
+  // ── header row ──
+  const headerCols = dates.map(date => {
+    const ds       = fmtDate(date);
+    const existing = weekSlots.filter(s => s.date === ds);
+    const pending  = pendingCells[ds];
 
-  const headerCols = dates.map(function(date) {
-    const dateStr  = fmtDate(date);
-    const dayIdx   = date.getDay();
-    const existing = weekSlots.filter(s => s.date === dateStr);
-
-    const slotBlocks = existing.map(function(s) {
-      return '<div class="slot-block" onclick="deleteExistingSlot(\'' + s.id + '\',\'' + dateStr + '\',\'' + s.start_time + '\',\'' + s.end_time + '\')">' +
-        '<p class="slot-block__time">' + s.start_time + '–' + s.end_time + '</p>' +
+    const savedBlocks = existing.map(s =>
+      '<div class="slot-block" onclick="deleteSlot(\'' + s.id + '\',\'' + ds + '\',\'' + s.start_time + '\',\'' + s.end_time + '\')">' +
+        '<p class="slot-block__time">' + s.start_time + '\u2013' + s.end_time + '</p>' +
         '<p class="slot-block__hint">點擊刪除</p>' +
-      '</div>';
-    }).join('');
+      '</div>'
+    ).join('');
 
-    return '<div class="day-col">' +
-      '<div class="day-col__header">' +
-        '<span class="day-col__header-date">' + String(date.getDate()).padStart(2,'0') + '</span>' +
-        '<span class="day-col__header-day">（' + DAY_NAMES[dayIdx] + '）</span>' +
+    const pendingBlock = pending
+      ? '<div class="slot-block-pending">' +
+          '<p class="slot-block-pending__time">' +
+            String(Math.min(pending.s, pending.e)).padStart(2, '0') + ':00\u2013' +
+            String(Math.max(pending.s, pending.e) + 1).padStart(2, '0') + ':00' +
+          '</p>' +
+          '<p class="slot-block-pending__hint">\u25b2 待儲存</p>' +
+        '</div>'
+      : '';
+
+    return '<div class="head-col">' +
+      '<div class="head-date-row">' +
+        '<span class="head-date">' + String(date.getDate()).padStart(2, '0') + '</span>' +
+        '<span class="head-day">\uff08' + DAY_NAMES[date.getDay()] + '\uff09</span>' +
       '</div>' +
-      '<div class="day-col__slots">' + slotBlocks + '</div>' +
+      '<div class="head-slots">' + savedBlocks + pendingBlock + '</div>' +
     '</div>';
   }).join('');
 
-  const axisCells = HOURS.map(h =>
+  // ── body row ──
+  const timeCells = HOURS.map(h =>
     '<div class="time-axis__cell">' + h + ':00</div>'
   ).join('');
 
-  const bodyCols = dates.map(function(date) {
-    const dateStr = fmtDate(date);
-    const pending = pendingCells[dateStr];
-    const hourCells = HOURS.map(function(h) {
-      let cls = 'day-hour';
-      if (pending) {
-        const lo = Math.min(pending.startH, pending.endH);
-        const hi = Math.max(pending.startH, pending.endH);
-        if (h >= lo && h < hi) cls += ' is-in-range';
-      }
-      return '<div class="' + cls + '" ' +
-        'data-date="' + dateStr + '" data-hour="' + h + '" ' +
-        'onmousedown="startDrag(\'' + dateStr + '\',' + h + ')" ' +
-        'onmouseover="extendDrag(\'' + dateStr + '\',' + h + ')" ' +
-        'onmouseup="endDrag()">' +
-      '</div>';
+  const bodyCols = dates.map(date => {
+    const ds      = fmtDate(date);
+    const pending = pendingCells[ds];
+    const cells   = HOURS.map(h => {
+      const lo  = pending ? Math.min(pending.s, pending.e) : -1;
+      const hi  = pending ? Math.max(pending.s, pending.e) : -1;
+      const cls = 'hour-cell' + (pending && h >= lo && h <= hi ? ' is-in-range' : '');
+      return '<div class="' + cls + '"' +
+        ' onmousedown="startDrag(\'' + ds + '\',' + h + ')"' +
+        ' onmouseover="extendDrag(\'' + ds + '\',' + h + ')"' +
+        ' onmouseup="endDrag()">' +
+        '</div>';
     }).join('');
-    return '<div class="day-col">' + hourCells + '</div>';
+    return '<div class="body-col">' + cells + '</div>';
   }).join('');
 
-  wrap.innerHTML =
+  document.getElementById('calendar-wrap').innerHTML =
     '<div class="cal-header-row">' +
-      '<div class="time-axis-spacer"></div>' +
-      '<div class="week-cols">' + headerCols + '</div>' +
+      '<div class="cal-axis-spacer"></div>' +
+      '<div class="cal-head-cols">' + headerCols + '</div>' +
     '</div>' +
     '<div class="cal-body-row">' +
-      '<div class="time-axis">' + axisCells + '</div>' +
-      '<div class="week-cols">' + bodyCols + '</div>' +
+      '<div class="time-axis">' + timeCells + '</div>' +
+      '<div class="cal-body-cols">' + bodyCols + '</div>' +
     '</div>';
 }
 
-// 拖曳選取
-function startDrag(date, hour) {
-  dragState = { date: date, startH: hour, endH: hour };
-  updatePending(date, hour, hour);
+// 拖曳
+function startDrag(date, h) {
+  dragState = { date, s: h, e: h };
+  pendingCells[date] = { s: h, e: h };
+  renderCalendar();
 }
-
-function extendDrag(date, hour) {
+function extendDrag(date, h) {
   if (!dragState || date !== dragState.date) return;
-  dragState.endH = hour;
-  updatePending(date, dragState.startH, hour);
+  dragState.e = h;
+  pendingCells[date] = { s: dragState.s, e: h };
+  renderCalendar();
 }
-
 function endDrag() {
-  if (dragState) {
-    // 起點和終點相同 → 單格點擊，視為取消該天選取
-    if (dragState.startH === dragState.endH) {
-      delete pendingCells[dragState.date];
-      renderCalendar(getWeekDates(weekOffset));
-      renderPendingSummary();
-    }
+  if (dragState && dragState.s === dragState.e) {
+    delete pendingCells[dragState.date];
+    renderCalendar();
   }
   dragState = null;
 }
-document.addEventListener('mouseup', endDrag);
+document.addEventListener('mouseup', () => { if (dragState) endDrag(); });
 
-function updatePending(date, h1, h2) {
-  const lo = Math.min(h1, h2);
-  const hi = Math.max(h1, h2);
-  pendingCells[date] = { startH: lo, endH: hi };
-  renderCalendar(getWeekDates(weekOffset));
-  renderPendingSummary();
-}
-
-function renderPendingSummary() {
-  const el      = document.getElementById('pending-summary');
-  const entries = Object.entries(pendingCells);
-  if (!entries.length) { el.style.display = 'none'; return; }
-
-  const lines = entries.map(function(e) {
-    const date = e[0];
-    const cell = e[1];
-    const startH = String(cell.startH).padStart(2, '0');
-    const endH   = String(cell.endH + 1).padStart(2, '0');
-    return '▲ ' + date + '　' + startH + ':00 – ' + endH + ':00　（待儲存）';
-  });
-
-  el.innerHTML  = lines.join('<br>');
-  el.style.display = 'block';
-}
-
-async function deleteExistingSlot(id, date, start, end) {
-  if (!confirm('確定要刪除 ' + date + ' ' + start + '–' + end + ' 的時段？')) return;
+async function deleteSlot(id, date, start, end) {
+  if (!confirm('確定要刪除 ' + date + ' ' + start + '\u2013' + end + ' 的時段？')) return;
   try {
-    const res = await post({ action: 'deleteSlot', token: sessionToken, slotId: id });
+    const res = await apiPost({ action: 'deleteSlot', token: sessionToken, slotId: id });
     if (!res.success) throw new Error(res.message);
     showToast('已刪除時段');
-    await initWeekGrid();
+    await initWeekCalendar();
   } catch (e) { showToast('刪除失敗：' + e.message); }
 }
 
@@ -1405,28 +668,28 @@ async function saveNewSlots() {
   if (!entries.length) { showToast('請先選取時間範圍'); return; }
 
   const btn    = document.getElementById('save-slots-btn');
-  const maxCap = parseInt(document.getElementById('max-cap-input').value) || 6;
+  const maxCap = parseInt(document.getElementById('cap-input').value) || 6;
   btn.disabled = true; btn.textContent = '儲存中⋯';
 
   let ok = 0, fail = 0;
-  for (let i = 0; i < entries.length; i++) {
-    const date    = entries[i][0];
-    const cell    = entries[i][1];
-    const startH  = Math.min(cell.startH, cell.endH);
-    const endH    = Math.max(cell.startH, cell.endH) + 1;
-    const start   = String(startH).padStart(2, '0') + ':00';
-    const end     = String(endH).padStart(2, '0') + ':00';
+  for (const [date, { s, e }] of entries) {
+    const startH = Math.min(s, e);
+    const endH   = Math.max(s, e) + 1;
+    const start  = String(startH).padStart(2, '0') + ':00';
+    const end    = String(endH).padStart(2, '0')   + ':00';
     try {
-      const res = await post({ action: 'addSlot', token: sessionToken, date: date, start_time: start, end_time: end, max_capacity: maxCap });
-      if (res.success) ok++; else fail++;
-    } catch (e) { fail++; }
+      const res = await apiPost({
+        action: 'addSlot', token: sessionToken,
+        date, start_time: start, end_time: end, max_capacity: maxCap,
+      });
+      res.success ? ok++ : fail++;
+    } catch (_) { fail++; }
   }
 
   pendingCells = {};
   btn.disabled = false; btn.textContent = '✦ 儲存新增時段';
-  document.getElementById('pending-summary').style.display = 'none';
-  showToast(fail ? '儲存完成（' + ok + ' 成功，' + fail + ' 失敗）' : '已新增 ' + ok + ' 個時段');
-  await initWeekGrid();
+  showToast(fail ? '完成（' + ok + ' 成功，' + fail + ' 失敗）' : '已新增 ' + ok + ' 個時段');
+  await initWeekCalendar();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1435,7 +698,7 @@ async function saveNewSlots() {
 
 async function loadBookings() {
   try {
-    const res = await post({ action: 'getBookings', token: sessionToken });
+    const res = await apiPost({ action: 'getBookings', token: sessionToken });
     if (!res.success) throw new Error(res.message);
     allBookings = res.bookings || [];
     buildMonthOptions();
@@ -1447,9 +710,10 @@ async function loadBookings() {
 }
 
 function buildMonthOptions() {
-  const months = Array.from(new Set(
-    allBookings.filter(b => b.course_date).map(b => String(b.course_date).slice(0, 7))
-  )).sort().reverse();
+  const months = [...new Set(
+    allBookings.filter(b => b.course_date)
+      .map(b => String(b.course_date).slice(0, 7))
+  )].sort().reverse();
 
   const now = new Date();
   const cur = now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0');
@@ -1463,11 +727,14 @@ function buildMonthOptions() {
 
 function filterByMonth() {
   selectedMonth = document.getElementById('month-select').value;
-  const filtered = allBookings.filter(b => String(b.course_date || '').startsWith(selectedMonth));
+  const filtered = allBookings.filter(b =>
+    String(b.course_date || '').startsWith(selectedMonth)
+  );
 
   const pending  = filtered.filter(b => b.status === '待確認').length;
   const approved = filtered.filter(b => b.status === '已核准').length;
-  const amount   = filtered.filter(b => b.status === '已核准')
+  const amount   = filtered
+    .filter(b => b.status === '已核准')
     .reduce((s, b) => s + (parseFloat(b.total_amount) || 0), 0);
 
   document.getElementById('stat-pending').textContent  = pending;
@@ -1480,25 +747,27 @@ function filterByMonth() {
 
 function renderBookings(bookings) {
   const list = document.getElementById('booking-list');
-  if (!bookings.length) { list.innerHTML = '<p class="empty-state">本月無預約紀錄</p>'; return; }
+  if (!bookings.length) {
+    list.innerHTML = '<p class="empty-state">本月無預約紀錄</p>';
+    return;
+  }
 
-  list.innerHTML = bookings.map(function(b) {
+  list.innerHTML = bookings.map(b => {
     const statusCls = b.status === '待確認' ? 'status-pending'
                     : b.status === '已核准'  ? 'status-approved'
                     : 'status-cancelled';
-    const refundInfo = (b.refund_bank_code || b.refund_account)
-      ? '<div class="detail-item"><p class="detail-item__label">退款帳號</p><p class="detail-item__value">' + (b.refund_bank_code || '') + ' ' + (b.refund_account || '') + '</p></div>'
-      : '';
-    const confirmedRow = b.confirmed_at
-      ? '<div class="detail-item"><p class="detail-item__label">核准時間</p><p class="detail-item__value">' + b.confirmed_at + '</p></div>'
-      : '';
     const canCancel = b.status === '待確認' || b.status === '已核准';
-    const cancelBtn = canCancel
-      ? '<button class="btn-cancel" id="cancel-' + b.booking_id + '" onclick="cancelBooking(\'' + b.booking_id + '\')">取消此預約</button>'
-      : '';
+    const last5     = String(b.transfer_last5 || '').replace(/^'/, '');
+    const refundRow = (b.refund_bank_code || b.refund_account)
+      ? '<div><p class="detail-label">退款帳號</p><p class="detail-value">' +
+        (b.refund_bank_code || '').replace(/^'/, '') + ' ' +
+        (b.refund_account   || '').replace(/^'/, '') +
+        '</p></div>' : '';
+    const confirmedRow = b.confirmed_at
+      ? '<div><p class="detail-label">核准時間</p><p class="detail-value">' + b.confirmed_at + '</p></div>' : '';
 
     return '<div class="booking-item" id="bi-' + b.booking_id + '">' +
-      '<div class="booking-item__summary" onclick="toggleBooking(\'' + b.booking_id + '\')">' +
+      '<div class="booking-summary" onclick="toggleBooking(\'' + b.booking_id + '\')">' +
         '<span class="booking-id">' + b.booking_id + '</span>' +
         '<div class="booking-main">' +
           '<p class="booking-course">' + b.course_title + '</p>' +
@@ -1507,25 +776,28 @@ function renderBookings(bookings) {
         '<span class="booking-amount">NT$ ' + Number(b.total_amount).toLocaleString() + '</span>' +
         '<span class="booking-status ' + statusCls + '">' + b.status + '</span>' +
       '</div>' +
-      '<div class="booking-item__detail">' +
+      '<div class="booking-detail" id="bd-' + b.booking_id + '">' +
         '<div class="detail-grid">' +
-          '<div class="detail-item"><p class="detail-item__label">聯絡人</p><p class="detail-item__value">' + b.contact_name + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">電話</p><p class="detail-item__value">' + b.phone + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">Email</p><p class="detail-item__value">' + b.email + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">人數</p><p class="detail-item__value">' + b.participants + ' 人</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">末五碼</p><p class="detail-item__value">' + String(b.transfer_last5 || '').replace(/^'/, '') + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">備注</p><p class="detail-item__value">' + (b.note || '—') + '</p></div>' +
-          refundInfo + confirmedRow +
-          '<div class="detail-item"><p class="detail-item__label">建立時間</p><p class="detail-item__value">' + b.created_at + '</p></div>' +
+          '<div><p class="detail-label">聯絡人</p><p class="detail-value">'  + b.contact_name + '</p></div>' +
+          '<div><p class="detail-label">電話</p><p class="detail-value">'    + b.phone        + '</p></div>' +
+          '<div><p class="detail-label">Email</p><p class="detail-value">'   + b.email        + '</p></div>' +
+          '<div><p class="detail-label">人數</p><p class="detail-value">'    + b.participants + ' 人</p></div>' +
+          '<div><p class="detail-label">末五碼</p><p class="detail-value">'  + last5          + '</p></div>' +
+          '<div><p class="detail-label">備注</p><p class="detail-value">'    + (b.note || '—')+ '</p></div>' +
+          refundRow + confirmedRow +
+          '<div><p class="detail-label">建立時間</p><p class="detail-value">' + b.created_at  + '</p></div>' +
         '</div>' +
-        cancelBtn +
+        (canCancel
+          ? '<button class="btn-cancel" id="cancel-' + b.booking_id + '" onclick="cancelBooking(\'' + b.booking_id + '\')">取消此預約</button>'
+          : '') +
       '</div>' +
     '</div>';
   }).join('');
 }
 
 function toggleBooking(id) {
-  document.getElementById('bi-' + id).classList.toggle('is-open');
+  const el = document.getElementById('bd-' + id);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
 }
 
 async function cancelBooking(bookingId) {
@@ -1533,7 +805,7 @@ async function cancelBooking(bookingId) {
   const btn = document.getElementById('cancel-' + bookingId);
   btn.disabled = true; btn.textContent = '取消中⋯';
   try {
-    const res = await post({ action: 'reject', bookingId: bookingId });
+    const res = await apiPost({ action: 'reject', bookingId });
     if (!res.success) throw new Error(res.message);
     showToast('已取消預約，通知信已寄出');
     await loadBookings();
@@ -1552,1131 +824,84 @@ async function loadCourses() {
     const r = await fetch(API + '?action=getTemplates');
     const d = await r.json();
     allTemplates = d.templates || [];
-    renderCourseEditor();
-  } catch (e) {
-    document.getElementById('course-editor-list').innerHTML =
-      '<p class="empty-state">載入失敗</p>';
+    renderCourses();
+  } catch (_) {
+    document.getElementById('course-list').innerHTML = '<p class="empty-state">載入失敗</p>';
   }
 }
 
-function renderCourseEditor() {
-  const list = document.getElementById('course-editor-list');
+function renderCourses() {
+  const list = document.getElementById('course-list');
   if (!allTemplates.length) {
-    list.innerHTML = '<p class="empty-state">尚無課程資料</p>'; return;
+    list.innerHTML = '<p class="empty-state">尚無課程資料</p>';
+    return;
   }
-
-  list.innerHTML = allTemplates.map(function(t, idx) {
-    return '<div class="course-editor-item" id="cei-' + t.id + '">' +
-      '<div class="course-editor-item__header" onclick="toggleCourseEditor(\'' + t.id + '\')">' +
-        '<span class="course-editor-item__title">' + t.title + '</span>' +
-        '<span class="course-editor-item__id">' + t.id + '</span>' +
+  list.innerHTML = allTemplates.map(t => {
+    const esc = s => String(s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    return '<div class="course-item">' +
+      '<div class="course-header" onclick="toggleCourse(\'' + t.id + '\')">' +
+        '<span class="course-header__title">' + t.title + '</span>' +
+        '<span class="course-header__id">' + t.id + '</span>' +
       '</div>' +
-      '<div class="course-editor-item__body">' +
-        '<div class="field-group">' +
-          '<label class="field-label">課程名稱</label>' +
-          '<input class="field-input" id="ce-title-' + t.id + '" value="' + esc(t.title) + '">' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">一句話摘要（Tagline）</label>' +
-          '<input class="field-input" id="ce-tagline-' + t.id + '" value="' + esc(t.tagline || '') + '">' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">完整課程說明</label>' +
-          '<textarea class="field-textarea" id="ce-desc-' + t.id + '">' + esc(t.description || '') + '</textarea>' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">課程圖片網址（Cloudinary）</label>' +
-          '<input class="field-input" id="ce-img-' + t.id + '" value="' + esc(t.image_url || '') + '">' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">定價設定</label>' +
-          '<div class="price-row">' +
-            '<div class="field-group"><label class="field-label">1 人</label><input class="field-input" id="ce-p1-' + t.id + '" type="number" value="' + (t.price_1 || '') + '"></div>' +
-            '<div class="field-group"><label class="field-label">2 人同行</label><input class="field-input" id="ce-p2-' + t.id + '" type="number" value="' + (t.price_2 || '') + '"></div>' +
-            '<div class="field-group"><label class="field-label">3 人同行</label><input class="field-input" id="ce-p3-' + t.id + '" type="number" value="' + (t.price_3 || '') + '"></div>' +
-            '<div class="field-group"><label class="field-label">4 人同行</label><input class="field-input" id="ce-p4-' + t.id + '" type="number" value="' + (t.price_4 || '') + '"></div>' +
-          '</div>' +
-        '</div>' +
-        '<button class="btn-save-course" onclick="saveCourse(\'' + t.id + '\')">儲存課程資料</button>' +
-        '<p class="save-result" id="ce-result-' + t.id + '"></p>' +
+      '<div class="course-body" id="cb-' + t.id + '">' +
+        '<div class="field-group"><label class="field-label">課程名稱</label>' +
+          '<input class="field-input" id="ce-title-' + t.id + '" value="' + esc(t.title) + '"></div>' +
+        '<div class="field-group"><label class="field-label">一句話摘要（Tagline）</label>' +
+          '<input class="field-input" id="ce-tagline-' + t.id + '" value="' + esc(t.tagline || '') + '"></div>' +
+        '<div class="field-group"><label class="field-label">完整課程說明</label>' +
+          '<textarea class="field-textarea" id="ce-desc-' + t.id + '">' + esc(t.description || '') + '</textarea></div>' +
+        '<div class="field-group"><label class="field-label">Cloudinary 圖片網址</label>' +
+          '<input class="field-input" id="ce-img-' + t.id + '" value="' + esc(t.image_url || '') + '" placeholder="https://res.cloudinary.com/..."></div>' +
+        '<div class="field-group"><label class="field-label">定價設定</label>' +
+          '<div class="price-grid">' +
+            '<div><label class="field-label" style="font-size:8px">1 人</label>' +
+              '<input class="field-input" id="ce-p1-' + t.id + '" type="number" value="' + (t.price_1 || '') + '"></div>' +
+            '<div><label class="field-label" style="font-size:8px">2 人同行</label>' +
+              '<input class="field-input" id="ce-p2-' + t.id + '" type="number" value="' + (t.price_2 || '') + '"></div>' +
+            '<div><label class="field-label" style="font-size:8px">3 人同行</label>' +
+              '<input class="field-input" id="ce-p3-' + t.id + '" type="number" value="' + (t.price_3 || '') + '"></div>' +
+            '<div><label class="field-label" style="font-size:8px">4 人同行</label>' +
+              '<input class="field-input" id="ce-p4-' + t.id + '" type="number" value="' + (t.price_4 || '') + '"></div>' +
+          '</div></div>' +
+        '<button class="btn-save-course" onclick="saveCourse(\'' + t.id + '\', this)">儲存課程資料</button>' +
+        '<p class="save-result" id="cr-' + t.id + '"></p>' +
       '</div>' +
     '</div>';
   }).join('');
 }
 
-function toggleCourseEditor(id) {
-  document.getElementById('cei-' + id).classList.toggle('is-open');
+function toggleCourse(id) {
+  const el = document.getElementById('cb-' + id);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
 }
 
-async function saveCourse(templateId) {
-  const btn    = document.querySelector('#cei-' + templateId + ' .btn-save-course');
-  const result = document.getElementById('ce-result-' + templateId);
-
+async function saveCourse(templateId, btn) {
+  const result = document.getElementById('cr-' + templateId);
   btn.disabled = true; btn.textContent = '儲存中⋯';
   result.textContent = ''; result.className = 'save-result';
 
-  const fields = {
-    templateId  : templateId,
-    token       : sessionToken,
-    action      : 'updateTemplate',
-    title       : document.getElementById('ce-title-'   + templateId).value.trim(),
-    tagline     : document.getElementById('ce-tagline-' + templateId).value.trim(),
-    description : document.getElementById('ce-desc-'    + templateId).value.trim(),
-    image_url   : document.getElementById('ce-img-'     + templateId).value.trim(),
-    price_1     : document.getElementById('ce-p1-'      + templateId).value,
-    price_2     : document.getElementById('ce-p2-'      + templateId).value,
-    price_3     : document.getElementById('ce-p3-'      + templateId).value,
-    price_4     : document.getElementById('ce-p4-'      + templateId).value,
-  };
-
   try {
-    const res = await post(fields);
+    const res = await apiPost({
+      action      : 'updateTemplate',
+      token       : sessionToken,
+      templateId,
+      title       : document.getElementById('ce-title-'   + templateId).value.trim(),
+      tagline     : document.getElementById('ce-tagline-' + templateId).value.trim(),
+      description : document.getElementById('ce-desc-'    + templateId).value.trim(),
+      image_url   : document.getElementById('ce-img-'     + templateId).value.trim(),
+      price_1     : document.getElementById('ce-p1-'      + templateId).value,
+      price_2     : document.getElementById('ce-p2-'      + templateId).value,
+      price_3     : document.getElementById('ce-p3-'      + templateId).value,
+      price_4     : document.getElementById('ce-p4-'      + templateId).value,
+    });
     if (!res.success) throw new Error(res.message);
     result.textContent = '✓ 已儲存'; result.className = 'save-result ok';
     showToast('課程資料已更新');
     await loadCourses();
   } catch (e) {
-    result.textContent = '✗ 儲存失敗：' + e.message; result.className = 'save-result err';
+    result.textContent = '✗ ' + e.message; result.className = 'save-result err';
   }
-
   btn.disabled = false; btn.textContent = '儲存課程資料';
-}
-
-// ── 工具 ─────────────────────────────────────────────────────
-function esc(str) {
-  return String(str)
-    .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-</script>
-</body>
-</html>';
-
-// ── 常數 ─────────────────────────────────────────────────────
-const DAY_NAMES    = ['日', '一', '二', '三', '四', '五', '六'];
-const HOURS        = Array.from({ length: 13 }, (_, i) => i + 9); // 09:00–21:00
-const COURSE_HOURS = 3;
-
-// ── Auth ─────────────────────────────────────────────────────
-let sessionToken = localStorage.getItem('admin_token');
-
-async function doLogin() {
-  const pwd = document.getElementById('login-pwd').value;
-  const btn = document.getElementById('login-btn');
-  const err = document.getElementById('login-error');
-  if (!pwd) return;
-  btn.disabled = true; btn.textContent = '驗證中⋯'; err.textContent = '';
-  try {
-    const res = await post({ action: 'login', password: pwd });
-    if (!res.success) throw new Error(res.message);
-    sessionToken = res.token;
-    localStorage.setItem('admin_token', sessionToken);
-    showApp();
-  } catch (e) {
-    err.textContent = e.message || '登入失敗';
-    btn.disabled = false; btn.textContent = '登 入';
-  }
-}
-
-async function doLogout() {
-  await post({ action: 'logout', token: sessionToken });
-  localStorage.removeItem('admin_token');
-  sessionToken = null;
-  document.getElementById('app').style.display        = 'none';
-  document.getElementById('login-page').style.display = 'flex';
-}
-
-function showApp() {
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('app').style.display        = 'block';
-  initWeekGrid();
-  loadBookings();
-  loadCourses();
-}
-
-// ── 時段管理 state（必須在 showApp 呼叫前宣告）────────────────
-let weekOffset   = 0;
-let weekSlots    = [];
-let pendingCells = {};
-let dragState    = null;
-
-// ── 預約紀錄 state ───────────────────────────────────────────
-let allBookings   = [];
-let selectedMonth = '';
-
-// ── 課程 state ───────────────────────────────────────────────
-let allTemplates = [];
-
-if (sessionToken) showApp();
-
-document.getElementById('login-pwd').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
-
-// ── API ──────────────────────────────────────────────────────
-async function post(data) {
-  const res = await fetch(API, { method: 'POST', body: JSON.stringify(data) });
-  const d   = await res.json();
-  if (d.message === 'SESSION_EXPIRED') { handleSessionExpired(); throw new Error('SESSION_EXPIRED'); }
-  return d;
-}
-
-function handleSessionExpired() {
-  localStorage.removeItem('admin_token');
-  sessionToken = null;
-  document.getElementById('app').style.display        = 'none';
-  document.getElementById('login-page').style.display = 'flex';
-  document.getElementById('login-error').textContent  = '登入已過期，請重新登入';
-}
-
-// ── Tabs ─────────────────────────────────────────────────────
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('is-active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('is-active'));
-  document.getElementById('tab-' + name).classList.add('is-active');
-  btn.classList.add('is-active');
-}
-
-// ── Toast ────────────────────────────────────────────────────
-let toastTimer = null;
-function showToast(msg, duration) {
-  duration = duration || 2500;
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('is-visible');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('is-visible'), duration);
-}
-
-// ══════════════════════════════════════════════════════════════
-//  時段管理
-// ══════════════════════════════════════════════════════════════
-
-function getWeekDates(offset) {
-  offset = offset || 0;
-  const today  = new Date();
-  const dow    = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1) + offset * 7);
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return d;
-  });
-}
-
-function fmtDate(d) {
-  const y  = d.getFullYear();
-  const m  = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return y + '/' + m + '/' + dd;
-}
-
-function changeWeek(dir) {
-  weekOffset += dir;
-  pendingCells = {};
-  initWeekGrid();
-}
-
-async function initWeekGrid() {
-  const dates = getWeekDates(weekOffset);
-  document.getElementById('week-label').textContent =
-    fmtDate(dates[0]) + ' – ' + fmtDate(dates[6]);
-
-  try {
-    const r = await fetch(API + '?action=getSlots');
-    const d = await r.json();
-    weekSlots = d.slots || [];
-  } catch (e) { weekSlots = []; }
-
-  renderCalendar(dates);
-}
-
-function renderCalendar(dates) {
-  const wrap = document.getElementById('calendar-wrap');
-
-  // 策略：calendar-wrap 改為 flex-column
-  // 第一行：header-row（日期 + 時段塊，同一個 flex 列，跟下方時間格完全對齊）
-  // 第二行：body-row（時間軸 + 時間格，可捲動）
-
-  const headerCols = dates.map(function(date) {
-    const dateStr  = fmtDate(date);
-    const dayIdx   = date.getDay();
-    const existing = weekSlots.filter(s => s.date === dateStr);
-
-    const slotBlocks = existing.map(function(s) {
-      return '<div class="slot-block" onclick="deleteExistingSlot(\'' + s.id + '\',\'' + dateStr + '\',\'' + s.start_time + '\',\'' + s.end_time + '\')">' +
-        '<p class="slot-block__time">' + s.start_time + '–' + s.end_time + '</p>' +
-        '<p class="slot-block__hint">點擊刪除</p>' +
-      '</div>';
-    }).join('');
-
-    return '<div class="day-col">' +
-      '<div class="day-col__header">' +
-        '<span class="day-col__header-date">' + String(date.getDate()).padStart(2,'0') + '</span>' +
-        '<span class="day-col__header-day">（' + DAY_NAMES[dayIdx] + '）</span>' +
-      '</div>' +
-      '<div class="day-col__slots">' + slotBlocks + '</div>' +
-    '</div>';
-  }).join('');
-
-  const axisCells = HOURS.map(h =>
-    '<div class="time-axis__cell">' + h + ':00</div>'
-  ).join('');
-
-  const bodyCols = dates.map(function(date) {
-    const dateStr = fmtDate(date);
-    const pending = pendingCells[dateStr];
-    const hourCells = HOURS.map(function(h) {
-      let cls = 'day-hour';
-      if (pending) {
-        const lo = Math.min(pending.startH, pending.endH);
-        const hi = Math.max(pending.startH, pending.endH);
-        if (h >= lo && h < hi) cls += ' is-in-range';
-      }
-      return '<div class="' + cls + '" ' +
-        'data-date="' + dateStr + '" data-hour="' + h + '" ' +
-        'onmousedown="startDrag(\'' + dateStr + '\',' + h + ')" ' +
-        'onmouseover="extendDrag(\'' + dateStr + '\',' + h + ')" ' +
-        'onmouseup="endDrag()">' +
-      '</div>';
-    }).join('');
-    return '<div class="day-col">' + hourCells + '</div>';
-  }).join('');
-
-  wrap.innerHTML =
-    '<div class="cal-header-row">' +
-      '<div class="time-axis-spacer"></div>' +
-      '<div class="week-cols">' + headerCols + '</div>' +
-    '</div>' +
-    '<div class="cal-body-row">' +
-      '<div class="time-axis">' + axisCells + '</div>' +
-      '<div class="week-cols">' + bodyCols + '</div>' +
-    '</div>';
-}
-
-// 拖曳選取
-function startDrag(date, hour) {
-  dragState = { date: date, startH: hour, endH: hour };
-  updatePending(date, hour, hour);
-}
-
-function extendDrag(date, hour) {
-  if (!dragState || date !== dragState.date) return;
-  dragState.endH = hour;
-  updatePending(date, dragState.startH, hour);
-}
-
-function endDrag() {
-  if (dragState) {
-    // 起點和終點相同 → 單格點擊，視為取消該天選取
-    if (dragState.startH === dragState.endH) {
-      delete pendingCells[dragState.date];
-      renderCalendar(getWeekDates(weekOffset));
-      renderPendingSummary();
-    }
-  }
-  dragState = null;
-}
-document.addEventListener('mouseup', endDrag);
-
-function updatePending(date, h1, h2) {
-  const lo = Math.min(h1, h2);
-  const hi = Math.max(h1, h2);
-  pendingCells[date] = { startH: lo, endH: hi };
-  renderCalendar(getWeekDates(weekOffset));
-  renderPendingSummary();
-}
-
-function renderPendingSummary() {
-  const el      = document.getElementById('pending-summary');
-  const entries = Object.entries(pendingCells);
-  if (!entries.length) { el.style.display = 'none'; return; }
-
-  const lines = entries.map(function(e) {
-    const date = e[0];
-    const cell = e[1];
-    const startH = String(cell.startH).padStart(2, '0');
-    const endH   = String(cell.endH + 1).padStart(2, '0');
-    return '▲ ' + date + '　' + startH + ':00 – ' + endH + ':00　（待儲存）';
-  });
-
-  el.innerHTML  = lines.join('<br>');
-  el.style.display = 'block';
-}
-
-async function deleteExistingSlot(id, date, start, end) {
-  if (!confirm('確定要刪除 ' + date + ' ' + start + '–' + end + ' 的時段？')) return;
-  try {
-    const res = await post({ action: 'deleteSlot', token: sessionToken, slotId: id });
-    if (!res.success) throw new Error(res.message);
-    showToast('已刪除時段');
-    await initWeekGrid();
-  } catch (e) { showToast('刪除失敗：' + e.message); }
-}
-
-async function saveNewSlots() {
-  const entries = Object.entries(pendingCells);
-  if (!entries.length) { showToast('請先選取時間範圍'); return; }
-
-  const btn    = document.getElementById('save-slots-btn');
-  const maxCap = parseInt(document.getElementById('max-cap-input').value) || 6;
-  btn.disabled = true; btn.textContent = '儲存中⋯';
-
-  let ok = 0, fail = 0;
-  for (let i = 0; i < entries.length; i++) {
-    const date    = entries[i][0];
-    const cell    = entries[i][1];
-    const startH  = Math.min(cell.startH, cell.endH);
-    const endH    = Math.max(cell.startH, cell.endH) + 1;
-    const start   = String(startH).padStart(2, '0') + ':00';
-    const end     = String(endH).padStart(2, '0') + ':00';
-    try {
-      const res = await post({ action: 'addSlot', token: sessionToken, date: date, start_time: start, end_time: end, max_capacity: maxCap });
-      if (res.success) ok++; else fail++;
-    } catch (e) { fail++; }
-  }
-
-  pendingCells = {};
-  btn.disabled = false; btn.textContent = '✦ 儲存新增時段';
-  document.getElementById('pending-summary').style.display = 'none';
-  showToast(fail ? '儲存完成（' + ok + ' 成功，' + fail + ' 失敗）' : '已新增 ' + ok + ' 個時段');
-  await initWeekGrid();
-}
-
-// ══════════════════════════════════════════════════════════════
-//  預約紀錄
-// ══════════════════════════════════════════════════════════════
-
-async function loadBookings() {
-  try {
-    const res = await post({ action: 'getBookings', token: sessionToken });
-    if (!res.success) throw new Error(res.message);
-    allBookings = res.bookings || [];
-    buildMonthOptions();
-    filterByMonth();
-  } catch (e) {
-    document.getElementById('booking-list').innerHTML =
-      '<p class="empty-state">載入失敗：' + e.message + '</p>';
-  }
-}
-
-function buildMonthOptions() {
-  const months = Array.from(new Set(
-    allBookings.filter(b => b.course_date).map(b => String(b.course_date).slice(0, 7))
-  )).sort().reverse();
-
-  const now = new Date();
-  const cur = now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0');
-  if (!months.includes(cur)) months.unshift(cur);
-
-  const sel = document.getElementById('month-select');
-  sel.innerHTML = months.map(m => '<option value="' + m + '">' + m + '</option>').join('');
-  selectedMonth = cur;
-  sel.value = cur;
-}
-
-function filterByMonth() {
-  selectedMonth = document.getElementById('month-select').value;
-  const filtered = allBookings.filter(b => String(b.course_date || '').startsWith(selectedMonth));
-
-  const pending  = filtered.filter(b => b.status === '待確認').length;
-  const approved = filtered.filter(b => b.status === '已核准').length;
-  const amount   = filtered.filter(b => b.status === '已核准')
-    .reduce((s, b) => s + (parseFloat(b.total_amount) || 0), 0);
-
-  document.getElementById('stat-pending').textContent  = pending;
-  document.getElementById('stat-approved').textContent = approved;
-  document.getElementById('stat-total').textContent    = filtered.length;
-  document.getElementById('stat-amount').textContent   = 'NT$' + amount.toLocaleString();
-
-  renderBookings(filtered.slice().reverse());
-}
-
-function renderBookings(bookings) {
-  const list = document.getElementById('booking-list');
-  if (!bookings.length) { list.innerHTML = '<p class="empty-state">本月無預約紀錄</p>'; return; }
-
-  list.innerHTML = bookings.map(function(b) {
-    const statusCls = b.status === '待確認' ? 'status-pending'
-                    : b.status === '已核准'  ? 'status-approved'
-                    : 'status-cancelled';
-    const refundInfo = (b.refund_bank_code || b.refund_account)
-      ? '<div class="detail-item"><p class="detail-item__label">退款帳號</p><p class="detail-item__value">' + (b.refund_bank_code || '') + ' ' + (b.refund_account || '') + '</p></div>'
-      : '';
-    const confirmedRow = b.confirmed_at
-      ? '<div class="detail-item"><p class="detail-item__label">核准時間</p><p class="detail-item__value">' + b.confirmed_at + '</p></div>'
-      : '';
-    const canCancel = b.status === '待確認' || b.status === '已核准';
-    const cancelBtn = canCancel
-      ? '<button class="btn-cancel" id="cancel-' + b.booking_id + '" onclick="cancelBooking(\'' + b.booking_id + '\')">取消此預約</button>'
-      : '';
-
-    return '<div class="booking-item" id="bi-' + b.booking_id + '">' +
-      '<div class="booking-item__summary" onclick="toggleBooking(\'' + b.booking_id + '\')">' +
-        '<span class="booking-id">' + b.booking_id + '</span>' +
-        '<div class="booking-main">' +
-          '<p class="booking-course">' + b.course_title + '</p>' +
-          '<p class="booking-time">' + b.course_date + ' &nbsp;' + b.course_time + '</p>' +
-        '</div>' +
-        '<span class="booking-amount">NT$ ' + Number(b.total_amount).toLocaleString() + '</span>' +
-        '<span class="booking-status ' + statusCls + '">' + b.status + '</span>' +
-      '</div>' +
-      '<div class="booking-item__detail">' +
-        '<div class="detail-grid">' +
-          '<div class="detail-item"><p class="detail-item__label">聯絡人</p><p class="detail-item__value">' + b.contact_name + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">電話</p><p class="detail-item__value">' + b.phone + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">Email</p><p class="detail-item__value">' + b.email + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">人數</p><p class="detail-item__value">' + b.participants + ' 人</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">末五碼</p><p class="detail-item__value">' + String(b.transfer_last5 || '').replace(/^'/, '') + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">備注</p><p class="detail-item__value">' + (b.note || '—') + '</p></div>' +
-          refundInfo + confirmedRow +
-          '<div class="detail-item"><p class="detail-item__label">建立時間</p><p class="detail-item__value">' + b.created_at + '</p></div>' +
-        '</div>' +
-        cancelBtn +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-function toggleBooking(id) {
-  document.getElementById('bi-' + id).classList.toggle('is-open');
-}
-
-async function cancelBooking(bookingId) {
-  if (!confirm('確定要取消預約 ' + bookingId + '？\n取消後將自動寄送通知信給學員。')) return;
-  const btn = document.getElementById('cancel-' + bookingId);
-  btn.disabled = true; btn.textContent = '取消中⋯';
-  try {
-    const res = await post({ action: 'reject', bookingId: bookingId });
-    if (!res.success) throw new Error(res.message);
-    showToast('已取消預約，通知信已寄出');
-    await loadBookings();
-  } catch (e) {
-    showToast('取消失敗：' + e.message);
-    btn.disabled = false; btn.textContent = '取消此預約';
-  }
-}
-
-// ══════════════════════════════════════════════════════════════
-//  課程編輯
-// ══════════════════════════════════════════════════════════════
-
-async function loadCourses() {
-  try {
-    const r = await fetch(API + '?action=getTemplates');
-    const d = await r.json();
-    allTemplates = d.templates || [];
-    renderCourseEditor();
-  } catch (e) {
-    document.getElementById('course-editor-list').innerHTML =
-      '<p class="empty-state">載入失敗</p>';
-  }
-}
-
-function renderCourseEditor() {
-  const list = document.getElementById('course-editor-list');
-  if (!allTemplates.length) {
-    list.innerHTML = '<p class="empty-state">尚無課程資料</p>'; return;
-  }
-
-  list.innerHTML = allTemplates.map(function(t, idx) {
-    return '<div class="course-editor-item" id="cei-' + t.id + '">' +
-      '<div class="course-editor-item__header" onclick="toggleCourseEditor(\'' + t.id + '\')">' +
-        '<span class="course-editor-item__title">' + t.title + '</span>' +
-        '<span class="course-editor-item__id">' + t.id + '</span>' +
-      '</div>' +
-      '<div class="course-editor-item__body">' +
-        '<div class="field-group">' +
-          '<label class="field-label">課程名稱</label>' +
-          '<input class="field-input" id="ce-title-' + t.id + '" value="' + esc(t.title) + '">' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">一句話摘要（Tagline）</label>' +
-          '<input class="field-input" id="ce-tagline-' + t.id + '" value="' + esc(t.tagline || '') + '">' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">完整課程說明</label>' +
-          '<textarea class="field-textarea" id="ce-desc-' + t.id + '">' + esc(t.description || '') + '</textarea>' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">課程圖片網址（Cloudinary）</label>' +
-          '<input class="field-input" id="ce-img-' + t.id + '" value="' + esc(t.image_url || '') + '">' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">定價設定</label>' +
-          '<div class="price-row">' +
-            '<div class="field-group"><label class="field-label">1 人</label><input class="field-input" id="ce-p1-' + t.id + '" type="number" value="' + (t.price_1 || '') + '"></div>' +
-            '<div class="field-group"><label class="field-label">2 人同行</label><input class="field-input" id="ce-p2-' + t.id + '" type="number" value="' + (t.price_2 || '') + '"></div>' +
-            '<div class="field-group"><label class="field-label">3 人同行</label><input class="field-input" id="ce-p3-' + t.id + '" type="number" value="' + (t.price_3 || '') + '"></div>' +
-            '<div class="field-group"><label class="field-label">4 人同行</label><input class="field-input" id="ce-p4-' + t.id + '" type="number" value="' + (t.price_4 || '') + '"></div>' +
-          '</div>' +
-        '</div>' +
-        '<button class="btn-save-course" onclick="saveCourse(\'' + t.id + '\')">儲存課程資料</button>' +
-        '<p class="save-result" id="ce-result-' + t.id + '"></p>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-function toggleCourseEditor(id) {
-  document.getElementById('cei-' + id).classList.toggle('is-open');
-}
-
-async function saveCourse(templateId) {
-  const btn    = document.querySelector('#cei-' + templateId + ' .btn-save-course');
-  const result = document.getElementById('ce-result-' + templateId);
-
-  btn.disabled = true; btn.textContent = '儲存中⋯';
-  result.textContent = ''; result.className = 'save-result';
-
-  const fields = {
-    templateId  : templateId,
-    token       : sessionToken,
-    action      : 'updateTemplate',
-    title       : document.getElementById('ce-title-'   + templateId).value.trim(),
-    tagline     : document.getElementById('ce-tagline-' + templateId).value.trim(),
-    description : document.getElementById('ce-desc-'    + templateId).value.trim(),
-    image_url   : document.getElementById('ce-img-'     + templateId).value.trim(),
-    price_1     : document.getElementById('ce-p1-'      + templateId).value,
-    price_2     : document.getElementById('ce-p2-'      + templateId).value,
-    price_3     : document.getElementById('ce-p3-'      + templateId).value,
-    price_4     : document.getElementById('ce-p4-'      + templateId).value,
-  };
-
-  try {
-    const res = await post(fields);
-    if (!res.success) throw new Error(res.message);
-    result.textContent = '✓ 已儲存'; result.className = 'save-result ok';
-    showToast('課程資料已更新');
-    await loadCourses();
-  } catch (e) {
-    result.textContent = '✗ 儲存失敗：' + e.message; result.className = 'save-result err';
-  }
-
-  btn.disabled = false; btn.textContent = '儲存課程資料';
-}
-
-// ── 工具 ─────────────────────────────────────────────────────
-function esc(str) {
-  return String(str)
-    .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-</script>
-</body>
-</html>';
-
-// ── 常數 ─────────────────────────────────────────────────────
-const DAY_NAMES    = ['日', '一', '二', '三', '四', '五', '六'];
-const HOURS        = Array.from({ length: 13 }, (_, i) => i + 9); // 09:00–21:00
-const COURSE_HOURS = 3;
-
-// ── Auth ─────────────────────────────────────────────────────
-let sessionToken = localStorage.getItem('admin_token');
-
-async function doLogin() {
-  const pwd = document.getElementById('login-pwd').value;
-  const btn = document.getElementById('login-btn');
-  const err = document.getElementById('login-error');
-  if (!pwd) return;
-  btn.disabled = true; btn.textContent = '驗證中⋯'; err.textContent = '';
-  try {
-    const res = await post({ action: 'login', password: pwd });
-    if (!res.success) throw new Error(res.message);
-    sessionToken = res.token;
-    localStorage.setItem('admin_token', sessionToken);
-    showApp();
-  } catch (e) {
-    err.textContent = e.message || '登入失敗';
-    btn.disabled = false; btn.textContent = '登 入';
-  }
-}
-
-async function doLogout() {
-  await post({ action: 'logout', token: sessionToken });
-  localStorage.removeItem('admin_token');
-  sessionToken = null;
-  document.getElementById('app').style.display        = 'none';
-  document.getElementById('login-page').style.display = 'flex';
-}
-
-function showApp() {
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('app').style.display        = 'block';
-  initWeekGrid();
-  loadBookings();
-  loadCourses();
-}
-
-// ── 時段管理 state（必須在 showApp 呼叫前宣告）────────────────
-let weekOffset   = 0;
-let weekSlots    = [];
-let pendingCells = {};
-let dragState    = null;
-
-// ── 預約紀錄 state ───────────────────────────────────────────
-let allBookings   = [];
-let selectedMonth = '';
-
-// ── 課程 state ───────────────────────────────────────────────
-let allTemplates = [];
-
-if (sessionToken) showApp();
-
-document.getElementById('login-pwd').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
-
-// ── API ──────────────────────────────────────────────────────
-async function post(data) {
-  const res = await fetch(API, { method: 'POST', body: JSON.stringify(data) });
-  const d   = await res.json();
-  if (d.message === 'SESSION_EXPIRED') { handleSessionExpired(); throw new Error('SESSION_EXPIRED'); }
-  return d;
-}
-
-function handleSessionExpired() {
-  localStorage.removeItem('admin_token');
-  sessionToken = null;
-  document.getElementById('app').style.display        = 'none';
-  document.getElementById('login-page').style.display = 'flex';
-  document.getElementById('login-error').textContent  = '登入已過期，請重新登入';
-}
-
-// ── Tabs ─────────────────────────────────────────────────────
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('is-active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('is-active'));
-  document.getElementById('tab-' + name).classList.add('is-active');
-  btn.classList.add('is-active');
-}
-
-// ── Toast ────────────────────────────────────────────────────
-let toastTimer = null;
-function showToast(msg, duration) {
-  duration = duration || 2500;
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('is-visible');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('is-visible'), duration);
-}
-
-// ══════════════════════════════════════════════════════════════
-//  時段管理
-// ══════════════════════════════════════════════════════════════
-
-function getWeekDates(offset) {
-  offset = offset || 0;
-  const today  = new Date();
-  const dow    = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1) + offset * 7);
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return d;
-  });
-}
-
-function fmtDate(d) {
-  const y  = d.getFullYear();
-  const m  = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return y + '/' + m + '/' + dd;
-}
-
-function changeWeek(dir) {
-  weekOffset += dir;
-  pendingCells = {};
-  initWeekGrid();
-}
-
-async function initWeekGrid() {
-  const dates = getWeekDates(weekOffset);
-  document.getElementById('week-label').textContent =
-    fmtDate(dates[0]) + ' – ' + fmtDate(dates[6]);
-
-  try {
-    const r = await fetch(API + '?action=getSlots');
-    const d = await r.json();
-    weekSlots = d.slots || [];
-  } catch (e) { weekSlots = []; }
-
-  renderCalendar(dates);
-}
-
-function renderCalendar(dates) {
-  const wrap = document.getElementById('calendar-wrap');
-
-  // 策略：calendar-wrap 改為 flex-column
-  // 第一行：header-row（日期 + 時段塊，同一個 flex 列，跟下方時間格完全對齊）
-  // 第二行：body-row（時間軸 + 時間格，可捲動）
-
-  const headerCols = dates.map(function(date) {
-    const dateStr  = fmtDate(date);
-    const dayIdx   = date.getDay();
-    const existing = weekSlots.filter(s => s.date === dateStr);
-
-    const slotBlocks = existing.map(function(s) {
-      return '<div class="slot-block" onclick="deleteExistingSlot(\'' + s.id + '\',\'' + dateStr + '\',\'' + s.start_time + '\',\'' + s.end_time + '\')">' +
-        '<p class="slot-block__time">' + s.start_time + '–' + s.end_time + '</p>' +
-        '<p class="slot-block__hint">點擊刪除</p>' +
-      '</div>';
-    }).join('');
-
-    return '<div class="day-col">' +
-      '<div class="day-col__header">' +
-        '<span class="day-col__header-date">' + String(date.getDate()).padStart(2,'0') + '</span>' +
-        '<span class="day-col__header-day">（' + DAY_NAMES[dayIdx] + '）</span>' +
-      '</div>' +
-      '<div class="day-col__slots">' + slotBlocks + '</div>' +
-    '</div>';
-  }).join('');
-
-  const axisCells = HOURS.map(h =>
-    '<div class="time-axis__cell">' + h + ':00</div>'
-  ).join('');
-
-  const bodyCols = dates.map(function(date) {
-    const dateStr = fmtDate(date);
-    const pending = pendingCells[dateStr];
-    const hourCells = HOURS.map(function(h) {
-      let cls = 'day-hour';
-      if (pending) {
-        const lo = Math.min(pending.startH, pending.endH);
-        const hi = Math.max(pending.startH, pending.endH);
-        if (h >= lo && h < hi) cls += ' is-in-range';
-      }
-      return '<div class="' + cls + '" ' +
-        'data-date="' + dateStr + '" data-hour="' + h + '" ' +
-        'onmousedown="startDrag(\'' + dateStr + '\',' + h + ')" ' +
-        'onmouseover="extendDrag(\'' + dateStr + '\',' + h + ')" ' +
-        'onmouseup="endDrag()">' +
-      '</div>';
-    }).join('');
-    return '<div class="day-col">' + hourCells + '</div>';
-  }).join('');
-
-  wrap.innerHTML =
-    '<div class="cal-header-row">' +
-      '<div class="time-axis-spacer"></div>' +
-      '<div class="week-cols">' + headerCols + '</div>' +
-    '</div>' +
-    '<div class="cal-body-row">' +
-      '<div class="time-axis">' + axisCells + '</div>' +
-      '<div class="week-cols">' + bodyCols + '</div>' +
-    '</div>';
-}
-
-// 拖曳選取
-function startDrag(date, hour) {
-  dragState = { date: date, startH: hour, endH: hour };
-  updatePending(date, hour, hour);
-}
-
-function extendDrag(date, hour) {
-  if (!dragState || date !== dragState.date) return;
-  dragState.endH = hour;
-  updatePending(date, dragState.startH, hour);
-}
-
-function endDrag() {
-  if (dragState) {
-    // 起點和終點相同 → 單格點擊，視為取消該天選取
-    if (dragState.startH === dragState.endH) {
-      delete pendingCells[dragState.date];
-      renderCalendar(getWeekDates(weekOffset));
-      renderPendingSummary();
-    }
-  }
-  dragState = null;
-}
-document.addEventListener('mouseup', endDrag);
-
-function updatePending(date, h1, h2) {
-  const lo = Math.min(h1, h2);
-  const hi = Math.max(h1, h2);
-  pendingCells[date] = { startH: lo, endH: hi };
-  renderCalendar(getWeekDates(weekOffset));
-  renderPendingSummary();
-}
-
-function renderPendingSummary() {
-  const el      = document.getElementById('pending-summary');
-  const entries = Object.entries(pendingCells);
-  if (!entries.length) { el.style.display = 'none'; return; }
-
-  const lines = entries.map(function(e) {
-    const date = e[0];
-    const cell = e[1];
-    const startH = String(cell.startH).padStart(2, '0');
-    const endH   = String(cell.endH + 1).padStart(2, '0');
-    return '▲ ' + date + '　' + startH + ':00 – ' + endH + ':00　（待儲存）';
-  });
-
-  el.innerHTML  = lines.join('<br>');
-  el.style.display = 'block';
-}
-
-async function deleteExistingSlot(id, date, start, end) {
-  if (!confirm('確定要刪除 ' + date + ' ' + start + '–' + end + ' 的時段？')) return;
-  try {
-    const res = await post({ action: 'deleteSlot', token: sessionToken, slotId: id });
-    if (!res.success) throw new Error(res.message);
-    showToast('已刪除時段');
-    await initWeekGrid();
-  } catch (e) { showToast('刪除失敗：' + e.message); }
-}
-
-async function saveNewSlots() {
-  const entries = Object.entries(pendingCells);
-  if (!entries.length) { showToast('請先選取時間範圍'); return; }
-
-  const btn    = document.getElementById('save-slots-btn');
-  const maxCap = parseInt(document.getElementById('max-cap-input').value) || 6;
-  btn.disabled = true; btn.textContent = '儲存中⋯';
-
-  let ok = 0, fail = 0;
-  for (let i = 0; i < entries.length; i++) {
-    const date    = entries[i][0];
-    const cell    = entries[i][1];
-    const startH  = Math.min(cell.startH, cell.endH);
-    const endH    = Math.max(cell.startH, cell.endH) + 1;
-    const start   = String(startH).padStart(2, '0') + ':00';
-    const end     = String(endH).padStart(2, '0') + ':00';
-    try {
-      const res = await post({ action: 'addSlot', token: sessionToken, date: date, start_time: start, end_time: end, max_capacity: maxCap });
-      if (res.success) ok++; else fail++;
-    } catch (e) { fail++; }
-  }
-
-  pendingCells = {};
-  btn.disabled = false; btn.textContent = '✦ 儲存新增時段';
-  document.getElementById('pending-summary').style.display = 'none';
-  showToast(fail ? '儲存完成（' + ok + ' 成功，' + fail + ' 失敗）' : '已新增 ' + ok + ' 個時段');
-  await initWeekGrid();
-}
-
-// ══════════════════════════════════════════════════════════════
-//  預約紀錄
-// ══════════════════════════════════════════════════════════════
-
-async function loadBookings() {
-  try {
-    const res = await post({ action: 'getBookings', token: sessionToken });
-    if (!res.success) throw new Error(res.message);
-    allBookings = res.bookings || [];
-    buildMonthOptions();
-    filterByMonth();
-  } catch (e) {
-    document.getElementById('booking-list').innerHTML =
-      '<p class="empty-state">載入失敗：' + e.message + '</p>';
-  }
-}
-
-function buildMonthOptions() {
-  const months = Array.from(new Set(
-    allBookings.filter(b => b.course_date).map(b => String(b.course_date).slice(0, 7))
-  )).sort().reverse();
-
-  const now = new Date();
-  const cur = now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0');
-  if (!months.includes(cur)) months.unshift(cur);
-
-  const sel = document.getElementById('month-select');
-  sel.innerHTML = months.map(m => '<option value="' + m + '">' + m + '</option>').join('');
-  selectedMonth = cur;
-  sel.value = cur;
-}
-
-function filterByMonth() {
-  selectedMonth = document.getElementById('month-select').value;
-  const filtered = allBookings.filter(b => String(b.course_date || '').startsWith(selectedMonth));
-
-  const pending  = filtered.filter(b => b.status === '待確認').length;
-  const approved = filtered.filter(b => b.status === '已核准').length;
-  const amount   = filtered.filter(b => b.status === '已核准')
-    .reduce((s, b) => s + (parseFloat(b.total_amount) || 0), 0);
-
-  document.getElementById('stat-pending').textContent  = pending;
-  document.getElementById('stat-approved').textContent = approved;
-  document.getElementById('stat-total').textContent    = filtered.length;
-  document.getElementById('stat-amount').textContent   = 'NT$' + amount.toLocaleString();
-
-  renderBookings(filtered.slice().reverse());
-}
-
-function renderBookings(bookings) {
-  const list = document.getElementById('booking-list');
-  if (!bookings.length) { list.innerHTML = '<p class="empty-state">本月無預約紀錄</p>'; return; }
-
-  list.innerHTML = bookings.map(function(b) {
-    const statusCls = b.status === '待確認' ? 'status-pending'
-                    : b.status === '已核准'  ? 'status-approved'
-                    : 'status-cancelled';
-    const refundInfo = (b.refund_bank_code || b.refund_account)
-      ? '<div class="detail-item"><p class="detail-item__label">退款帳號</p><p class="detail-item__value">' + (b.refund_bank_code || '') + ' ' + (b.refund_account || '') + '</p></div>'
-      : '';
-    const confirmedRow = b.confirmed_at
-      ? '<div class="detail-item"><p class="detail-item__label">核准時間</p><p class="detail-item__value">' + b.confirmed_at + '</p></div>'
-      : '';
-    const canCancel = b.status === '待確認' || b.status === '已核准';
-    const cancelBtn = canCancel
-      ? '<button class="btn-cancel" id="cancel-' + b.booking_id + '" onclick="cancelBooking(\'' + b.booking_id + '\')">取消此預約</button>'
-      : '';
-
-    return '<div class="booking-item" id="bi-' + b.booking_id + '">' +
-      '<div class="booking-item__summary" onclick="toggleBooking(\'' + b.booking_id + '\')">' +
-        '<span class="booking-id">' + b.booking_id + '</span>' +
-        '<div class="booking-main">' +
-          '<p class="booking-course">' + b.course_title + '</p>' +
-          '<p class="booking-time">' + b.course_date + ' &nbsp;' + b.course_time + '</p>' +
-        '</div>' +
-        '<span class="booking-amount">NT$ ' + Number(b.total_amount).toLocaleString() + '</span>' +
-        '<span class="booking-status ' + statusCls + '">' + b.status + '</span>' +
-      '</div>' +
-      '<div class="booking-item__detail">' +
-        '<div class="detail-grid">' +
-          '<div class="detail-item"><p class="detail-item__label">聯絡人</p><p class="detail-item__value">' + b.contact_name + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">電話</p><p class="detail-item__value">' + b.phone + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">Email</p><p class="detail-item__value">' + b.email + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">人數</p><p class="detail-item__value">' + b.participants + ' 人</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">末五碼</p><p class="detail-item__value">' + String(b.transfer_last5 || '').replace(/^'/, '') + '</p></div>' +
-          '<div class="detail-item"><p class="detail-item__label">備注</p><p class="detail-item__value">' + (b.note || '—') + '</p></div>' +
-          refundInfo + confirmedRow +
-          '<div class="detail-item"><p class="detail-item__label">建立時間</p><p class="detail-item__value">' + b.created_at + '</p></div>' +
-        '</div>' +
-        cancelBtn +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-function toggleBooking(id) {
-  document.getElementById('bi-' + id).classList.toggle('is-open');
-}
-
-async function cancelBooking(bookingId) {
-  if (!confirm('確定要取消預約 ' + bookingId + '？\n取消後將自動寄送通知信給學員。')) return;
-  const btn = document.getElementById('cancel-' + bookingId);
-  btn.disabled = true; btn.textContent = '取消中⋯';
-  try {
-    const res = await post({ action: 'reject', bookingId: bookingId });
-    if (!res.success) throw new Error(res.message);
-    showToast('已取消預約，通知信已寄出');
-    await loadBookings();
-  } catch (e) {
-    showToast('取消失敗：' + e.message);
-    btn.disabled = false; btn.textContent = '取消此預約';
-  }
-}
-
-// ══════════════════════════════════════════════════════════════
-//  課程編輯
-// ══════════════════════════════════════════════════════════════
-
-async function loadCourses() {
-  try {
-    const r = await fetch(API + '?action=getTemplates');
-    const d = await r.json();
-    allTemplates = d.templates || [];
-    renderCourseEditor();
-  } catch (e) {
-    document.getElementById('course-editor-list').innerHTML =
-      '<p class="empty-state">載入失敗</p>';
-  }
-}
-
-function renderCourseEditor() {
-  const list = document.getElementById('course-editor-list');
-  if (!allTemplates.length) {
-    list.innerHTML = '<p class="empty-state">尚無課程資料</p>'; return;
-  }
-
-  list.innerHTML = allTemplates.map(function(t, idx) {
-    return '<div class="course-editor-item" id="cei-' + t.id + '">' +
-      '<div class="course-editor-item__header" onclick="toggleCourseEditor(\'' + t.id + '\')">' +
-        '<span class="course-editor-item__title">' + t.title + '</span>' +
-        '<span class="course-editor-item__id">' + t.id + '</span>' +
-      '</div>' +
-      '<div class="course-editor-item__body">' +
-        '<div class="field-group">' +
-          '<label class="field-label">課程名稱</label>' +
-          '<input class="field-input" id="ce-title-' + t.id + '" value="' + esc(t.title) + '">' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">一句話摘要（Tagline）</label>' +
-          '<input class="field-input" id="ce-tagline-' + t.id + '" value="' + esc(t.tagline || '') + '">' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">完整課程說明</label>' +
-          '<textarea class="field-textarea" id="ce-desc-' + t.id + '">' + esc(t.description || '') + '</textarea>' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">課程圖片網址（Cloudinary）</label>' +
-          '<input class="field-input" id="ce-img-' + t.id + '" value="' + esc(t.image_url || '') + '">' +
-        '</div>' +
-        '<div class="field-group">' +
-          '<label class="field-label">定價設定</label>' +
-          '<div class="price-row">' +
-            '<div class="field-group"><label class="field-label">1 人</label><input class="field-input" id="ce-p1-' + t.id + '" type="number" value="' + (t.price_1 || '') + '"></div>' +
-            '<div class="field-group"><label class="field-label">2 人同行</label><input class="field-input" id="ce-p2-' + t.id + '" type="number" value="' + (t.price_2 || '') + '"></div>' +
-            '<div class="field-group"><label class="field-label">3 人同行</label><input class="field-input" id="ce-p3-' + t.id + '" type="number" value="' + (t.price_3 || '') + '"></div>' +
-            '<div class="field-group"><label class="field-label">4 人同行</label><input class="field-input" id="ce-p4-' + t.id + '" type="number" value="' + (t.price_4 || '') + '"></div>' +
-          '</div>' +
-        '</div>' +
-        '<button class="btn-save-course" onclick="saveCourse(\'' + t.id + '\')">儲存課程資料</button>' +
-        '<p class="save-result" id="ce-result-' + t.id + '"></p>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-function toggleCourseEditor(id) {
-  document.getElementById('cei-' + id).classList.toggle('is-open');
-}
-
-async function saveCourse(templateId) {
-  const btn    = document.querySelector('#cei-' + templateId + ' .btn-save-course');
-  const result = document.getElementById('ce-result-' + templateId);
-
-  btn.disabled = true; btn.textContent = '儲存中⋯';
-  result.textContent = ''; result.className = 'save-result';
-
-  const fields = {
-    templateId  : templateId,
-    token       : sessionToken,
-    action      : 'updateTemplate',
-    title       : document.getElementById('ce-title-'   + templateId).value.trim(),
-    tagline     : document.getElementById('ce-tagline-' + templateId).value.trim(),
-    description : document.getElementById('ce-desc-'    + templateId).value.trim(),
-    image_url   : document.getElementById('ce-img-'     + templateId).value.trim(),
-    price_1     : document.getElementById('ce-p1-'      + templateId).value,
-    price_2     : document.getElementById('ce-p2-'      + templateId).value,
-    price_3     : document.getElementById('ce-p3-'      + templateId).value,
-    price_4     : document.getElementById('ce-p4-'      + templateId).value,
-  };
-
-  try {
-    const res = await post(fields);
-    if (!res.success) throw new Error(res.message);
-    result.textContent = '✓ 已儲存'; result.className = 'save-result ok';
-    showToast('課程資料已更新');
-    await loadCourses();
-  } catch (e) {
-    result.textContent = '✗ 儲存失敗：' + e.message; result.className = 'save-result err';
-  }
-
-  btn.disabled = false; btn.textContent = '儲存課程資料';
-}
-
-// ── 工具 ─────────────────────────────────────────────────────
-function esc(str) {
-  return String(str)
-    .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 </script>
 </body>
