@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>體驗課程預約｜isroom 遺室</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      overflow-x: hidden;
+      max-width: 100%;
+      background: #0a0806;
+      color: #e8e0d5;
+      font-family: -apple-system, 'Noto Sans TC', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .page-wrap { width: 100%; max-width: 680px; margin: 0 auto; padding: 0 20px 60px; }
+
+    /* ── Header ── */
+    .site-header {
+      text-align: center;
+      padding: 48px 0 36px;
+      border-bottom: 1px solid #2a1f1a;
+      margin-bottom: 40px;
+    }
+    .brand-label {
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: #6a5a50;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .brand-title {
+      font-size: clamp(28px, 6vw, 38px);
+      font-weight: 300;
+      letter-spacing: 4px;
+      color: #e8e0d5;
+      margin-bottom: 8px;
+    }
+    .brand-sub {
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: #6a5a50;
+      font-style: italic;
+    }
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 36px 0 20px;
+    }
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #2a1f1a;
+    }
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: #6a5a50;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ── Loading ── */
+    #loading-state {
+      text-align: center;
+      padding: 60px 0;
+      color: #6a5a50;
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+    #main-content { display: none; }
+
+    /* ── Course Cards ── */
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .course-card {
+      border: 1px solid #2a1f1a;
+      cursor: pointer;
+      transition: border-color .2s;
+      overflow: hidden;
+    }
+    .course-card:hover        { border-color: #5a2a20; }
+    .course-card.is-selected  { border-color: #8a2a20; }
+    .course-card__image {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      display: block;
+      background: #1a1008;
+    }
+    .course-card__body { padding: 16px; }
+    .course-card__title {
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .course-card__tagline {
+      font-size: 12px;
+      color: #9a8f82;
+      margin-bottom: 10px;
+      line-height: 1.7;
+    }
+    .course-card__price {
+      font-size: 13px;
+      color: #9A0E0E;
+      letter-spacing: 1px;
+    }
+    .course-card__detail {
+      display: none;
+      padding: 0 16px 16px;
+      font-size: 12px;
+      color: #9a8f82;
+      line-height: 1.9;
+      white-space: pre-wrap;
+      border-top: 1px solid #2a1f1a;
+      margin-top: 4px;
+      padding-top: 14px;
+    }
+    .course-card.is-selected .course-card__detail { display: block; }
+
+    /* ── Slot Picker ── */
+    #slot-section { margin-bottom: 8px; }
+    .slot-empty {
+      text-align: center;
+      padding: 24px;
+      color: #6a5a50;
+      font-size: 13px;
+      letter-spacing: 1px;
+      border: 1px dashed #2a1f1a;
+    }
+    .slot-loading {
+      text-align: center;
+      padding: 24px;
+      color: #6a5a50;
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+
+    /* 日期群組 */
+    .date-group { margin-bottom: 12px; border: 1px solid #2a1f1a; }
+    .date-group__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      cursor: pointer;
+      background: #16120e;
+      transition: background .2s;
+    }
+    .date-group__header:hover { background: #1e1810; }
+    .date-group__date { font-size: 13px; letter-spacing: 2px; }
+    .date-group__day  { font-size: 12px; color: #6a5a50; }
+    .date-group__arrow {
+      font-size: 11px;
+      color: #6a5a50;
+      transition: transform .2s;
+    }
+    .date-group.is-open .date-group__arrow { transform: rotate(180deg); }
+    .date-group__times {
+      display: none;
+      padding: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .date-group.is-open .date-group__times { display: flex; }
+
+    /* 時間格 */
+    .time-slot {
+      border: 1px solid #3a2a22;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      min-width: 140px;
+      flex: 1;
+    }
+    .time-slot:hover:not(.is-disabled):not(.is-locked) { border-color: #8a2a20; }
+    .time-slot.is-selected { border-color: #8a2a20; background: #1e0c0c; }
+    .time-slot.is-disabled { opacity: .35; cursor: not-allowed; }
+    .time-slot.is-locked   { opacity: .5; cursor: not-allowed; }
+    .time-slot__range   { font-size: 13px; letter-spacing: 1px; margin-bottom: 4px; }
+    .time-slot__avail   { font-size: 11px; color: #9a8f82; }
+    .time-slot__locked  { font-size: 11px; color: #8a5020; }
+
+    /* ── Form ── */
+    #form-section { margin-bottom: 8px; }
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #9a8f82;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .form-label .required { color: #8a2a20; margin-left: 4px; }
+    .form-input, .form-select, .form-textarea {
+      display: block;
+      width: 100%;
+      background: #0e0a08;
+      border: 1px solid #3a2a22;
+      color: #e8e0d5;
+      font-family: inherit;
+      font-size: 14px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .2s;
+      -webkit-appearance: none;
+      appearance: none;
+      border-radius: 0;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #6a3020; }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-hint {
+      font-size: 11px;
+      color: #5a4a40;
+      margin-top: 6px;
+      line-height: 1.6;
+    }
+    .price-display {
+      text-align: right;
+      font-size: 22px;
+      color: #9A0E0E;
+      letter-spacing: 2px;
+      margin-top: 20px;
+      padding: 16px 0;
+      border-top: 1px solid #2a1f1a;
+      border-bottom: 1px solid #2a1f1a;
+    }
+    .price-display__label { font-size: 11px; letter-spacing: 3px; color: #6a5a50; margin-bottom: 6px; }
+
+    /* ── Payment ── */
+    #payment-section { margin-bottom: 8px; }
+    .bank-info {
+      background: #16120e;
+      border: 1px solid #3a2a22;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .bank-info__title {
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: #6a5a50;
+      margin-bottom: 14px;
+    }
+    .bank-info__row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #2a1f1a;
+    }
+    .bank-info__row:last-child { border-bottom: none; }
+    .bank-info__key   { color: #6a5a50; }
+    .bank-info__value { font-weight: 500; letter-spacing: 1px; }
+    .bank-info__amount {
+      text-align: right;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #3a2a22;
+    }
+    .bank-info__amount-label { font-size: 11px; letter-spacing: 2px; color: #6a5a50; margin-bottom: 4px; }
+    .bank-info__amount-value { font-size: 26px; color: #9A0E0E; letter-spacing: 2px; }
+    .refund-info {
+      background: #0e0a08;
+      border: 1px dashed #2a1f1a;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .refund-info__title {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #5a4a40;
+      margin-bottom: 12px;
+    }
+    .refund-hint {
+      font-size: 11px;
+      color: #5a4a40;
+      line-height: 1.7;
+      margin-top: 8px;
+    }
+    .refund-row { display: flex; gap: 12px; }
+    .refund-row .form-group { flex: 1; margin-bottom: 0; }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      display: block;
+      width: 100%;
+      background: transparent;
+      border: 1px solid #6a2a20;
+      color: #e8e0d5;
+      font-family: inherit;
+      font-size: 14px;
+      letter-spacing: 3px;
+      padding: 18px;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      -webkit-appearance: none;
+      border-radius: 0;
+      margin-top: 8px;
+    }
+    .btn-primary:hover    { background: #1e0c0c; border-color: #8a2a20; }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-back {
+      background: none;
+      border: none;
+      color: #6a5a50;
+      font-size: 12px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 16px;
+      display: block;
+      font-family: inherit;
+    }
+    .btn-back:hover { color: #9a8f82; }
+
+    /* ── Timer ── */
+    .lock-timer {
+      text-align: center;
+      font-size: 12px;
+      color: #8a5020;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      padding: 10px;
+      border: 1px solid #3a2010;
+      background: #16100a;
+    }
+
+    /* ── Confirmation ── */
+    #confirm-section { text-align: center; padding: 40px 0; }
+    .confirm-symbol  { font-size: 36px; margin-bottom: 20px; }
+    .confirm-title   { font-size: 20px; letter-spacing: 3px; margin-bottom: 12px; font-weight: 400; }
+    .confirm-desc    { font-size: 13px; color: #9a8f82; line-height: 1.9; margin-bottom: 24px; }
+    .confirm-id {
+      display: inline-block;
+      font-size: 14px;
+      letter-spacing: 3px;
+      color: #9a8f82;
+      background: #16120e;
+      border: 1px solid #2a1f1a;
+      padding: 12px 24px;
+    }
+
+    /* ── Selection Summary ── */
+    .selection-summary {
+      background: #16120e;
+      border: 1px solid #2a1f1a;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      font-size: 12px;
+      color: #9a8f82;
+      line-height: 1.8;
+    }
+
+    /* ── Error / CTA ── */
+    .error-msg { color: #c44; font-size: 12px; margin-top: 8px; }
+    .cta-hint  { font-size: 12px; color: #6a5a50; text-align: center; margin-top: 16px; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- Header -->
+  <header class="site-header">
+    <p class="brand-label">I S R O O M &nbsp;✦&nbsp; 遺 室</p>
+    <h1 class="brand-title">體 驗 課 程 預 約</h1>
+    <p class="brand-sub">Workshop Reservation</p>
+  </header>
+
+  <!-- Loading -->
+  <div id="loading-state">請稍候載入⋯⋯</div>
+
+  <!-- Main Content -->
+  <div id="main-content">
+
+    <!-- Step 1: 選課程 -->
+    <div id="course-section">
+      <div class="section-divider"><span class="section-label">選 擇 課 程</span></div>
+      <div id="course-cards" class="course-grid"></div>
+    </div>
+
+    <!-- Step 2: 選時段 -->
+    <div id="slot-section">
+      <div class="section-divider"><span class="section-label">選 擇 時 段</span></div>
+      <div id="slot-list"><p class="slot-empty">請先選擇課程</p></div>
+    </div>
+
+    <!-- Step 3: 填資料 -->
+    <div id="form-section" style="display:none">
+      <div class="section-divider"><span class="section-label">填 寫 資 料</span></div>
+      <div class="selection-summary" id="selection-summary"></div>
+
+      <div class="form-group">
+        <label class="form-label">姓名<span class="required">*</span></label>
+        <input id="f-name" class="form-input" type="text" placeholder="聯絡人姓名" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">電話<span class="required">*</span></label>
+        <input id="f-phone" class="form-input" type="tel" placeholder="聯絡電話" autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email<span class="required">*</span></label>
+        <input id="f-email" class="form-input" type="email" placeholder="確認信將寄至此信箱" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">人數<span class="required">*</span></label>
+        <select id="f-people" class="form-select">
+          <option value="">請選擇人數</option>
+          <option value="1">1 人</option>
+          <option value="2">2 人</option>
+          <option value="3">3 人</option>
+          <option value="4">4 人</option>
+          <option value="5">5 人</option>
+          <option value="6">6 人</option>
+        </select>
+      </div>
+      <div id="price-display" class="price-display" style="display:none">
+        <p class="price-display__label">應付總金額</p>
+        <p id="price-value">NT$ —</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">備注</label>
+        <textarea id="f-note" class="form-textarea" placeholder="特殊需求或備注（選填）"></textarea>
+      </div>
+
+      <button class="btn-primary" id="btn-to-payment">下一步：付款資訊 →</button>
+      <button class="btn-back" id="btn-back-to-slots">← 重新選擇時段</button>
+    </div>
+
+    <!-- Step 4: 付款 -->
+    <div id="payment-section" style="display:none">
+      <div class="section-divider"><span class="section-label">轉 帳 付 款</span></div>
+      <div class="selection-summary" id="payment-summary"></div>
+      <div class="lock-timer" id="lock-timer"></div>
+
+      <div class="bank-info">
+        <p class="bank-info__title">T R A N S F E R &nbsp; I N F O</p>
+        <div class="bank-info__row">
+          <span class="bank-info__key">銀行代號</span>
+          <span class="bank-info__value" id="bank-code">—</span>
+        </div>
+        <div class="bank-info__row">
+          <span class="bank-info__key">銀行名稱</span>
+          <span class="bank-info__value" id="bank-name">—</span>
+        </div>
+        <div class="bank-info__row">
+          <span class="bank-info__key">帳號</span>
+          <span class="bank-info__value" id="bank-account">—</span>
+        </div>
+        <div class="bank-info__row">
+          <span class="bank-info__key">戶名</span>
+          <span class="bank-info__value" id="bank-owner">—</span>
+        </div>
+        <div class="bank-info__amount">
+          <p class="bank-info__amount-label">應付金額</p>
+          <p class="bank-info__amount-value" id="bank-amount">NT$ —</p>
+        </div>
+      </div>
+
+      <!-- 退款帳號（選填） -->
+      <div class="refund-info">
+        <p class="refund-info__title">R E F U N D &nbsp; A C C O U N T &nbsp;（選填）</p>
+        <div class="refund-row">
+          <div class="form-group">
+            <label class="form-label">銀行代號</label>
+            <input id="f-refund-bank" class="form-input" type="text" placeholder="3–4 碼" maxlength="4" inputmode="numeric">
+          </div>
+          <div class="form-group" style="flex:2">
+            <label class="form-label">退款帳號</label>
+            <input id="f-refund-account" class="form-input" type="text" placeholder="10–16 碼" maxlength="16" inputmode="numeric">
+          </div>
+        </div>
+        <p class="refund-hint">若預約未能成立，退款將匯入此帳號；若未填寫，取消時將由店主另行聯繫。</p>
+      </div>
+
+      <!-- 末五碼 -->
+      <div class="form-group">
+        <label class="form-label">轉帳末五碼<span class="required">*</span></label>
+        <input id="f-last5" class="form-input" type="text" placeholder="請填入轉帳帳號末 5 碼" maxlength="5" inputmode="numeric">
+        <p class="form-hint">完成轉帳後，請填入您轉帳帳號的最後 5 位數字</p>
+      </div>
+
+      <div id="submit-error" class="error-msg" style="display:none"></div>
+      <button class="btn-primary" id="submit-btn">
+        <span>確認送出預約</span>
+      </button>
+      <button class="btn-back" id="btn-back-to-form">← 返回填寫資料</button>
+    </div>
+
+    <!-- Step 5: 完成 -->
+    <div id="confirm-section" style="display:none">
+      <div class="confirm-symbol">✦</div>
+      <p class="confirm-title">預約申請已送出</p>
+      <p class="confirm-desc">
+        感謝您的預約！<br>
+        店主確認轉帳後將寄送確認信至您的 Email。<br>
+        <br>
+        請保留以下預約編號：
+      </p>
+      <span class="confirm-id" id="confirm-booking-id"></span>
+    </div>
+
+    <!-- CTA hint -->
+    <p class="cta-hint" id="cta-hint"></p>
+
+  </div><!-- /main-content -->
+</div><!-- /page-wrap -->
+
+<script>
+// ============================================================
+//  設定：將此 URL 換成你的 Apps Script Web App URL
+// ============================================================
+const API = 'https://script.google.com/macros/s/AKfycbwc05jYhzbGPGNAJJv0kcBqx-22XHLB3pGXKCUShYAUxQBwBvlDwy7AcvuTcRPO3y2ftg/exec';
+
+// ── State ────────────────────────────────────────────────────
+const state = {
+  templates        : [],
+  slots            : [],
+  settings         : {},
+  selectedTemplate : null,   // template index
+  selectedSlot     : null,   // slot object
+  selectedStart    : null,   // 'HH:mm'
+  selectedEnd      : null,   // 'HH:mm'
+  people           : 1,
+  timerInterval    : null,
+};
+
+const DAY_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
+const COURSE_DURATION = 3;
+
+// ── 初始化 ───────────────────────────────────────────────────
+async function init() {
+  try {
+    const [r1, r2, r3] = await Promise.all([
+      fetch(API + '?action=getTemplates'),
+      fetch(API + '?action=getSlots'),
+      fetch(API + '?action=getSettings'),
+    ]);
+    const [d1, d2, d3] = await Promise.all([r1.json(), r2.json(), r3.json()]);
+
+    state.templates = d1.templates || [];
+    state.slots     = (d2.slots    || []).filter(s => s.status === 'open' || s.status === 'full');
+    state.settings  = d3.settings  || {};
+
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('main-content').style.display  = 'block';
+
+    renderCourseCards();
+    populateBankInfo();
+
+    // 每 60 秒重新抓時段（更新鎖定狀態）
+    setInterval(refreshSlots, 60000);
+
+  } catch (e) {
+    document.getElementById('loading-state').textContent = '— 無法載入資料，請重新整理頁面 —';
+  }
+}
+
+async function refreshSlots() {
+  try {
+    const r = await fetch(API + '?action=getSlots');
+    const d = await r.json();
+    state.slots = (d.slots || []).filter(s => s.status === 'open' || s.status === 'full');
+    if (state.selectedTemplate !== null) renderSlots();
+  } catch (e) { /* 靜默失敗 */ }
+}
+
+// ── 銀行資訊 ─────────────────────────────────────────────────
+function populateBankInfo() {
+  const s = state.settings;
+  document.getElementById('bank-code').textContent    = s.bank_code    || '—';
+  document.getElementById('bank-name').textContent    = s.bank_name    || '—';
+  document.getElementById('bank-account').textContent = s.account_number || '—';
+  document.getElementById('bank-owner').textContent   = s.account_name || '—';
+}
+
+// ── 課程卡片 ─────────────────────────────────────────────────
+function renderCourseCards() {
+  const container = document.getElementById('course-cards');
+  container.innerHTML = state.templates.map((t, i) => `
+    <div class="course-card" id="cc-${i}" onclick="selectCourse(${i})">
+      ${t.image_url ? `<img class="course-card__image" src="${t.image_url}" alt="${t.title}" loading="lazy">` : ''}
+      <div class="course-card__body">
+        <p class="course-card__title">${t.title}</p>
+        <p class="course-card__tagline">${t.tagline || ''}</p>
+        <p class="course-card__price">NT$ ${Number(t.price_1).toLocaleString()} / 人起</p>
+      </div>
+      <div class="course-card__detail">${(t.description || '').replace(/\n/g, '<br>')}</div>
+    </div>`).join('');
+}
+
+function selectCourse(index) {
+  // 取消其他選取
+  document.querySelectorAll('.course-card').forEach(el => el.classList.remove('is-selected'));
+  document.getElementById(`cc-${index}`).classList.add('is-selected');
+
+  state.selectedTemplate = index;
+  state.selectedSlot     = null;
+  state.selectedStart    = null;
+
+  renderSlots();
+  document.getElementById('slot-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── 時段列表 ─────────────────────────────────────────────────
+function renderSlots() {
+  const container = document.getElementById('slot-list');
+
+  const openSlots = state.slots.filter(s => s.status !== 'closed');
+  if (!openSlots.length) {
+    container.innerHTML = '<p class="slot-empty">目前沒有開放的時段，請稍後再查看</p>';
+    return;
+  }
+
+  // 按日期分組
+  const groups = {};
+  openSlots.forEach(slot => {
+    const d = slot.date;
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(slot);
+  });
+
+  container.innerHTML = Object.entries(groups).sort(([a], [b]) => a.localeCompare(b)).map(([date, slots]) => {
+    const [y, m, d] = date.split('/');
+    const dayIndex  = new Date(`${y}-${m}-${d}`).getDay();
+    const dayName   = `（${DAY_NAMES[dayIndex]}）`;
+
+    const times = slots.flatMap(slot => generateStartTimes(slot)).map(({ slot, start, end, avail, isLocked, isFull }) => {
+      const isSelected = state.selectedSlot?.id === slot.id && state.selectedStart === start;
+      const cls = [
+        'time-slot',
+        isSelected ? 'is-selected' : '',
+        isFull     ? 'is-disabled' : '',
+        isLocked   ? 'is-locked'   : '',
+      ].filter(Boolean).join(' ');
+
+      const availText = isLocked ? `<p class="time-slot__locked">預約中</p>`
+                      : isFull   ? `<p class="time-slot__avail">已額滿</p>`
+                      :            `<p class="time-slot__avail">剩餘 ${avail} 人</p>`;
+
+      const onclick = (!isFull && !isLocked)
+        ? `onclick="selectTime('${escHtml(JSON.stringify(slot))}','${start}','${end}')"` : '';
+
+      return `<div class="${cls}" ${onclick}>
+        <p class="time-slot__range">${start} ~ ${end}</p>
+        ${availText}
+      </div>`;
+    }).join('');
+
+    return `
+      <div class="date-group" id="dg-${date.replace(/\//g, '-')}">
+        <div class="date-group__header" onclick="toggleDateGroup(this)">
+          <span class="date-group__date">${date} <span class="date-group__day">${dayName}</span></span>
+          <span class="date-group__arrow">▼</span>
+        </div>
+        <div class="date-group__times">${times}</div>
+      </div>`;
+  }).join('');
+}
+
+/**
+ * 從一個 slot 區間產生所有可選的開始時間物件
+ */
+function generateStartTimes(slot) {
+  const startH  = parseInt(slot.start_time.split(':')[0]);
+  const endH    = parseInt(slot.end_time.split(':')[0]);
+  const results = [];
+
+  for (let h = startH; h + COURSE_DURATION <= endH; h++) {
+    const start  = `${String(h).padStart(2, '0')}:00`;
+    const end    = `${String(h + COURSE_DURATION).padStart(2, '0')}:00`;
+    const pend   = (slot.pending_by_time || {})[start] || 0;
+    const avail  = slot.max_capacity - slot.current_bookings - pend;
+    results.push({
+      slot,
+      start,
+      end,
+      avail,
+      isFull   : avail <= 0,
+      isLocked : (slot.locked_times || []).includes(start),
+    });
+  }
+  return results;
+}
+
+function toggleDateGroup(header) {
+  header.closest('.date-group').classList.toggle('is-open');
+}
+
+function selectTime(slotJson, start, end) {
+  const slot = JSON.parse(slotJson);
+  state.selectedSlot  = slot;
+  state.selectedStart = start;
+  state.selectedEnd   = end;
+
+  // 重繪時段列表（更新選取狀態）
+  renderSlots();
+
+  // 開啟對應的日期群組
+  const dateGroup = document.getElementById(`dg-${slot.date.replace(/\//g, '-')}`);
+  if (dateGroup) dateGroup.classList.add('is-open');
+
+  showFormSection();
+}
+
+// ── 表單區 ───────────────────────────────────────────────────
+function showFormSection() {
+  const slot = state.selectedSlot;
+  const tpl  = state.templates[state.selectedTemplate];
+  document.getElementById('selection-summary').innerHTML = `
+    ${tpl.title}<br>
+    ${slot.date} &nbsp;${state.selectedStart} ~ ${state.selectedEnd}`;
+
+  document.getElementById('form-section').style.display = 'block';
+  document.getElementById('form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('cta-hint').textContent = '';
+}
+
+function calcPrice(tpl, n) {
+  const p1 = parseFloat(tpl.price_1) || 0;
+  const combos = {};
+  [2, 3, 4, 5, 6].forEach(k => { if (tpl[`price_${k}`]) combos[k] = parseFloat(tpl[`price_${k}`]); });
+  if (combos[n]) return combos[n];
+  let best = n * p1;
+  Object.entries(combos).forEach(([k, v]) => {
+    const cnt   = parseInt(k);
+    const total = v + (n - cnt) * p1;
+    if (cnt < n && total < best) best = total;
+  });
+  return best;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('f-people').addEventListener('change', function () {
+    const n    = parseInt(this.value);
+    const tpl  = state.templates[state.selectedTemplate];
+    const disp = document.getElementById('price-display');
+    if (!n || !tpl) { disp.style.display = 'none'; return; }
+    state.people = n;
+    document.getElementById('price-value').textContent = `NT$ ${calcPrice(tpl, n).toLocaleString()}`;
+    disp.style.display = 'block';
+  });
+
+  document.getElementById('btn-to-payment').addEventListener('click', goToPayment);
+  document.getElementById('btn-back-to-slots').addEventListener('click', () => {
+    document.getElementById('form-section').style.display = 'none';
+  });
+
+  document.getElementById('btn-back-to-form').addEventListener('click', () => {
+    clearTimer();
+    document.getElementById('payment-section').style.display = 'none';
+    document.getElementById('form-section').style.display    = 'block';
+  });
+
+  document.getElementById('submit-btn').addEventListener('click', submitBooking);
+});
+
+function goToPayment() {
+  const name   = document.getElementById('f-name').value.trim();
+  const phone  = document.getElementById('f-phone').value.trim();
+  const email  = document.getElementById('f-email').value.trim();
+  const people = parseInt(document.getElementById('f-people').value);
+
+  if (!name || !phone || !email || !people) {
+    alert('請填寫所有必填欄位');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    alert('請輸入正確的 Email 格式');
+    return;
+  }
+
+  state.people = people;
+  const tpl    = state.templates[state.selectedTemplate];
+  const total  = calcPrice(tpl, people);
+
+  // 填入付款頁資訊
+  document.getElementById('bank-amount').textContent = `NT$ ${total.toLocaleString()}`;
+  document.getElementById('payment-summary').innerHTML = `
+    ${tpl.title}<br>
+    ${state.selectedSlot.date} &nbsp;${state.selectedStart} ~ ${state.selectedEnd}
+    &nbsp;｜ ${people} 人 &nbsp;NT$ ${total.toLocaleString()}`;
+
+  document.getElementById('form-section').style.display    = 'none';
+  document.getElementById('payment-section').style.display = 'block';
+  document.getElementById('payment-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── 計時器 ───────────────────────────────────────────────────
+function startTimer(expiresAt) {
+  clearTimer();
+  function tick() {
+    const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    document.getElementById('lock-timer').textContent =
+      `時段已鎖定，請於 ${m}:${String(s).padStart(2, '0')} 內完成送出`;
+    if (remaining <= 0) {
+      clearTimer();
+      document.getElementById('lock-timer').textContent = '鎖定已過期，請重新選擇時段';
+      document.getElementById('submit-btn').disabled = true;
+    }
+  }
+  tick();
+  state.timerInterval = setInterval(tick, 1000);
+}
+
+function clearTimer() {
+  if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
+}
+
+// ── 送出預約 ─────────────────────────────────────────────────
+async function submitBooking() {
+  const last5       = document.getElementById('f-last5').value.trim();
+  const refundBank  = document.getElementById('f-refund-bank').value.trim();
+  const refundAcct  = document.getElementById('f-refund-account').value.trim();
+  const errEl       = document.getElementById('submit-error');
+  const btn         = document.getElementById('submit-btn');
+
+  errEl.style.display = 'none';
+
+  if (!/^\d{1,5}$/.test(last5)) {
+    errEl.textContent = '末五碼請填入數字（最多 5 碼）'; errEl.style.display = 'block'; return;
+  }
+  if (refundBank && !/^\d{3,4}$/.test(refundBank)) {
+    errEl.textContent = '退款銀行代號格式不正確（3–4 碼數字）'; errEl.style.display = 'block'; return;
+  }
+  if (refundAcct && !/^\d{10,16}$/.test(refundAcct)) {
+    errEl.textContent = '退款帳號格式不正確（10–16 碼數字）'; errEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true;
+  btn.querySelector('span').textContent = '送出中⋯';
+
+  try {
+    // Step 1: 鎖定時段
+    const lockRes = await fetch(API, {
+      method  : 'POST',
+      body    : JSON.stringify({ action: 'lockSlot', slotId: state.selectedSlot.id, selectedStartTime: state.selectedStart }),
+    });
+    const lockData = await lockRes.json();
+
+    if (!lockData.success) {
+      errEl.textContent = lockData.message || '無法鎖定時段，請重試'; errEl.style.display = 'block';
+      btn.disabled = false; btn.querySelector('span').textContent = '確認送出預約'; return;
+    }
+
+    startTimer(lockData.expiresAt);
+
+    // Step 2: 送出預約
+    const tpl   = state.templates[state.selectedTemplate];
+    const total = calcPrice(tpl, state.people);
+
+    const bookingRes = await fetch(API, {
+      method  : 'POST',
+      body    : JSON.stringify({
+        action            : 'submitBooking',
+        slotId            : state.selectedSlot.id,
+        templateId        : tpl.id,
+        contactName       : document.getElementById('f-name').value.trim(),
+        phone             : document.getElementById('f-phone').value.trim(),
+        email             : document.getElementById('f-email').value.trim(),
+        participants      : state.people,
+        note              : document.getElementById('f-note').value.trim(),
+        transferLast5     : last5,
+        refundBankCode    : refundBank,
+        refundAccount     : refundAcct,
+        selectedStartTime : state.selectedStart,
+        selectedEndTime   : state.selectedEnd,
+        totalAmount       : total,
+      }),
+    });
+    const bookingData = await bookingRes.json();
+
+    clearTimer();
+
+    if (!bookingData.success) {
+      errEl.textContent = bookingData.message || '送出失敗，請重試'; errEl.style.display = 'block';
+      btn.disabled = false; btn.querySelector('span').textContent = '確認送出預約'; return;
+    }
+
+    // 成功：顯示確認頁
+    document.getElementById('payment-section').style.display  = 'none';
+    document.getElementById('course-section').style.display   = 'none';
+    document.getElementById('slot-section').style.display     = 'none';
+    document.getElementById('confirm-section').style.display  = 'block';
+    document.getElementById('confirm-booking-id').textContent = bookingData.bookingId;
+    document.getElementById('confirm-section').scrollIntoView({ behavior: 'smooth' });
+
+  } catch (e) {
+    errEl.textContent = '網路錯誤，請重試'; errEl.style.display = 'block';
+    btn.disabled = false; btn.querySelector('span').textContent = '確認送出預約';
+  }
+}
+
+// ── 工具 ─────────────────────────────────────────────────────
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── 啟動 ─────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
