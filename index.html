@@ -535,7 +535,7 @@
 // ============================================================
 //  設定：將此 URL 換成你的 Apps Script Web App URL
 // ============================================================
-const API = 'https://script.google.com/macros/s/AKfycbwc05jYhzbGPGNAJJv0kcBqx-22XHLB3pGXKCUShYAUxQBwBvlDwy7AcvuTcRPO3y2ftg/exec';
+const API = 'YOUR_APPS_SCRIPT_URL_HERE';
 
 // ── State ────────────────────────────────────────────────────
 const state = {
@@ -592,12 +592,26 @@ async function refreshSlots() {
 }
 
 // ── 銀行資訊 ─────────────────────────────────────────────────
+// ============================================================
+//  銀行轉帳資訊設定（幫別人安裝時請修改此處）
+//  如果 settings 工作表的銀行代號無法正常呈現，
+//  可將資料寫死在 BANK_INFO 中作為備用。
+//  settings 有資料時優先使用 settings，少了就 fallback 到寫死值。
+// ============================================================
+const BANK_INFO = {
+  code    : '823',   // 銀行代號，例：'012'
+  name    : '',   // 銀行名稱，例：'將來銀行'
+  account : '',   // 完整帳號，例：'88638307200727'
+  owner   : '',   // 戶名，例：'謝蕱威'
+};
+
 function populateBankInfo() {
   const s = state.settings;
-  document.getElementById('bank-code').textContent    = String(s.bank_code    || '').trim() || '—';
-  document.getElementById('bank-name').textContent    = s.bank_name    || '—';
-  document.getElementById('bank-account').textContent = s.account_number || '—';
-  document.getElementById('bank-owner').textContent   = s.account_name || '—';
+  // settings 工作表有資料則優先使用，否則 fallback 到 BANK_INFO 寫死值
+  document.getElementById('bank-code').textContent    = String(s.bank_code      || '').trim() || BANK_INFO.code    || '—';
+  document.getElementById('bank-name').textContent    = String(s.bank_name      || '').trim() || BANK_INFO.name    || '—';
+  document.getElementById('bank-account').textContent = String(s.account_number || '').trim() || BANK_INFO.account || '—';
+  document.getElementById('bank-owner').textContent   = String(s.account_name   || '').trim() || BANK_INFO.owner   || '—';
 }
 
 // ── 課程卡片 ─────────────────────────────────────────────────
