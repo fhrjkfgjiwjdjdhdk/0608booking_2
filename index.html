@@ -375,6 +375,7 @@
 
     /* ── Error / CTA ── */
     .error-msg { color: #c44; font-size: 12px; margin-top: 8px; }
+    .people-warn { color: #c44; font-size: 12px; margin-top: 6px; letter-spacing: 1px; }
     .cta-hint  { font-size: 12px; color: #6a5a50; text-align: center; margin-top: 16px; letter-spacing: 1px; }
   </style>
 </head>
@@ -446,6 +447,7 @@
         <textarea id="f-note" class="form-textarea" placeholder="特殊需求或備注（選填）"></textarea>
       </div>
 
+      <p class="people-warn" id="people-warn" style="display:none"></p>
       <button class="btn-primary" id="btn-to-payment">下一步：付款資訊 →</button>
       <button class="btn-back" id="btn-back-to-slots">← 重新選擇時段</button>
     </div>
@@ -544,6 +546,7 @@ const state = {
   selectedSlot     : null,   // slot object
   selectedStart    : null,   // 'HH:mm'
   selectedEnd      : null,   // 'HH:mm'
+  selectedAvail    : null,   // 選取時段的剩餘名額
   people           : 1,
   timerInterval    : null,
 };
@@ -685,7 +688,7 @@ function renderSlots() {
                       :            `<p class="time-slot__avail">剩餘 ${avail} 人</p>`;
 
       const onclick = (!isFull && !isLocked)
-        ? `onclick="selectTime('${escHtml(JSON.stringify(slot))}','${start}','${end}')"` : '';
+        ? `onclick="selectTime('${escHtml(JSON.stringify(slot))}','${start}','${end}',${avail})"` : '';
 
       return `<div class="${cls}" ${onclick}>
         <p class="time-slot__range">${start} ~ ${end}</p>
@@ -733,11 +736,12 @@ function toggleDateGroup(header) {
   header.closest('.date-group').classList.toggle('is-open');
 }
 
-function selectTime(slotJson, start, end) {
+function selectTime(slotJson, start, end, avail) {
   const slot = JSON.parse(slotJson);
   state.selectedSlot  = slot;
   state.selectedStart = start;
   state.selectedEnd   = end;
+  state.selectedAvail = parseInt(avail);
 
   // 重繪時段列表（更新選取狀態）
   renderSlots();
@@ -781,10 +785,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const n    = parseInt(this.value);
     const tpl  = state.templates[state.selectedTemplate];
     const disp = document.getElementById('price-display');
-    if (!n || !tpl) { disp.style.display = 'none'; return; }
+    const warn = document.getElementById('people-warn');
+    if (!n || !tpl) { disp.style.display = 'none'; warn.style.display = 'none'; return; }
     state.people = n;
-    document.getElementById('price-value').textContent = `NT$ ${calcPrice(tpl, n).toLocaleString()}`;
-    disp.style.display = 'block';
+    // 超過剩餘名額即時警告
+    if (state.selectedAvail !== null && n > state.selectedAvail) {
+      warn.textContent = `此時段剩餘 ${state.selectedAvail} 人，請重新選擇人數`;
+      warn.style.display = 'block';
+      disp.style.display = 'none';
+    } else {
+      warn.style.display = 'none';
+      document.getElementById('price-value').textContent = `NT$ ${calcPrice(tpl, n).toLocaleString()}`;
+      disp.style.display = 'block';
+    }
   });
 
   document.getElementById('btn-to-payment').addEventListener('click', goToPayment);
@@ -813,6 +826,10 @@ function goToPayment() {
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     alert('請輸入正確的 Email 格式');
+    return;
+  }
+  if (state.selectedAvail !== null && people > state.selectedAvail) {
+    alert(`所選人數（${people} 人）超過此時段剩餘名額（${state.selectedAvail} 人），請重新選擇`);
     return;
   }
 
