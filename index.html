@@ -232,7 +232,7 @@
     .form-textarea { resize: vertical; min-height: 80px; }
     .form-hint {
       font-size: 11px;
-      color: #5a4a40;
+      color: #9a8070;
       margin-top: 6px;
       line-height: 1.6;
     }
@@ -289,12 +289,12 @@
     .refund-info__title {
       font-size: 10px;
       letter-spacing: 3px;
-      color: #5a4a40;
+      color: #9a8070;
       margin-bottom: 12px;
     }
     .refund-hint {
       font-size: 11px;
-      color: #5a4a40;
+      color: #9a8070;
       line-height: 1.7;
       margin-top: 8px;
     }
@@ -338,11 +338,11 @@
     .lock-timer {
       text-align: center;
       font-size: 12px;
-      color: #8a5020;
+      color: #9a8070;
       letter-spacing: 2px;
       margin-bottom: 16px;
       padding: 10px;
-      border: 1px solid #3a2010;
+      border: 1px solid #4a3a28;
       background: #16100a;
     }
 
@@ -367,9 +367,10 @@
       border: 1px solid #2a1f1a;
       padding: 14px 16px;
       margin-bottom: 24px;
-      font-size: 12px;
-      color: #9a8f82;
-      line-height: 1.8;
+      font-size: 14px;
+      color: #e8e0d5;
+      line-height: 1.9;
+      letter-spacing: 1px;
     }
 
     /* ── Error / CTA ── */
@@ -499,7 +500,7 @@
       <div class="form-group">
         <label class="form-label">轉帳末五碼<span class="required">*</span></label>
         <input id="f-last5" class="form-input" type="text" placeholder="請填入轉帳帳號末 5 碼" maxlength="5" inputmode="numeric">
-        <p class="form-hint">完成轉帳後，請填入您轉帳帳號的最後 5 位數字</p>
+        <p class="form-hint">請填入完整 5 碼，如不足 5 碼請從帳號首位補零</p>
       </div>
 
       <div id="submit-error" class="error-msg" style="display:none"></div>
@@ -590,7 +591,7 @@ async function refreshSlots() {
 // ── 銀行資訊 ─────────────────────────────────────────────────
 function populateBankInfo() {
   const s = state.settings;
-  document.getElementById('bank-code').textContent    = s.bank_code    || '—';
+  document.getElementById('bank-code').textContent    = String(s.bank_code    || '').trim() || '—';
   document.getElementById('bank-name').textContent    = s.bank_name    || '—';
   document.getElementById('bank-account').textContent = s.account_number || '—';
   document.getElementById('bank-owner').textContent   = s.account_name || '—';
@@ -864,8 +865,8 @@ async function submitBooking() {
 
   errEl.style.display = 'none';
 
-  if (!/^\d{1,5}$/.test(last5)) {
-    errEl.textContent = '末五碼請填入數字（最多 5 碼）'; errEl.style.display = 'block'; return;
+  if (!/^\d{5}$/.test(last5)) {
+    errEl.textContent = '末五碼請填入完整 5 碼數字'; errEl.style.display = 'block'; return;
   }
   if (refundBank && !/^\d{3,4}$/.test(refundBank)) {
     errEl.textContent = '退款銀行代號格式不正確（3–4 碼數字）'; errEl.style.display = 'block'; return;
