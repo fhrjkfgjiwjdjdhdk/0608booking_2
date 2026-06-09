@@ -67,6 +67,10 @@
       text-transform: uppercase;
       white-space: nowrap;
     }
+    .section-label--slots {
+      font-size: 12px;
+      color: #9a8f82;
+    }
 
     /* ── Loading ── */
     #loading-state {
@@ -132,19 +136,7 @@
       line-height: 1.9; white-space: pre-wrap;
       margin-bottom: 18px;
     }
-    .course-detail__btn {
-      display: inline-block;
-      background: transparent;
-      border: 1px solid #8a2a20;
-      color: #e8e0d5;
-      font-family: inherit;
-      font-size: 12px; letter-spacing: 3px;
-      padding: 10px 24px;
-      cursor: pointer;
-      border-radius: 0;
-      transition: background .2s;
-    }
-    .course-detail__btn:hover { background: #1e0808; }
+
 
     /* ── Slot Picker ── */
     #slot-section { margin-bottom: 8px; }
@@ -411,7 +403,7 @@
 
     <!-- Step 2: 選時段 -->
     <div id="slot-section">
-      <div class="section-divider"><span class="section-label">選 擇 時 段</span></div>
+      <div class="section-divider"><span class="section-label section-label--slots">選 擇 時 段</span></div>
       <div id="slot-list"><p class="slot-empty">請先選擇課程</p></div>
     </div>
 
@@ -622,7 +614,7 @@ function renderCourseCards() {
   detailArea.innerHTML = state.templates.map((t, i) => `
     <div class="course-detail" id="cd-${i}">
       <p class="course-detail__text">${(t.description || '').replace(/\n/g, '<br>')}</p>
-      <button class="course-detail__btn" onclick="goToSlots()">選擇時段 →</button>
+
     </div>`).join('');
 }
 
