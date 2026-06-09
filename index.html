@@ -716,10 +716,12 @@ function generateStartTimes(slot) {
   const results = [];
 
   for (let h = startH; h + COURSE_DURATION <= endH; h++) {
-    const start  = `${String(h).padStart(2, '0')}:00`;
-    const end    = `${String(h + COURSE_DURATION).padStart(2, '0')}:00`;
-    const pend   = (slot.pending_by_time || {})[start] || 0;
-    const avail  = slot.max_capacity - slot.current_bookings - pend;
+    const start    = `${String(h).padStart(2, '0')}:00`;
+    const end      = `${String(h + COURSE_DURATION).padStart(2, '0')}:00`;
+    const pend     = (slot.pending_by_time  || {})[start] || 0;
+    const approved = (slot.approved_by_time || {})[start] || 0;
+    // 用各開始時間的已核准 + 待確認來計算剩餘，而非 current_bookings（整體加總會導致所有時段都算滿）
+    const avail    = slot.max_capacity - approved - pend;
     results.push({
       slot,
       start,
