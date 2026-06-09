@@ -118,18 +118,33 @@
       color: #9A0E0E;
       letter-spacing: 1px;
     }
-    .course-card__detail {
+    /* course-detail-area：課程說明展開區（卡片下方全寬） */
+    .course-detail {
       display: none;
-      padding: 0 16px 16px;
-      font-size: 12px;
-      color: #9a8f82;
-      line-height: 1.9;
-      white-space: pre-wrap;
-      border-top: 1px solid #2a1f1a;
-      margin-top: 4px;
-      padding-top: 14px;
+      border: 1px solid #3a1a1a;
+      background: #0e0806;
+      padding: 20px;
+      margin-bottom: 16px;
     }
-    .course-card.is-selected .course-card__detail { display: block; }
+    .course-detail.is-open { display: block; }
+    .course-detail__text {
+      font-size: 13px; color: #9a8f82;
+      line-height: 1.9; white-space: pre-wrap;
+      margin-bottom: 18px;
+    }
+    .course-detail__btn {
+      display: inline-block;
+      background: transparent;
+      border: 1px solid #8a2a20;
+      color: #e8e0d5;
+      font-family: inherit;
+      font-size: 12px; letter-spacing: 3px;
+      padding: 10px 24px;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background .2s;
+    }
+    .course-detail__btn:hover { background: #1e0808; }
 
     /* ── Slot Picker ── */
     #slot-section { margin-bottom: 8px; }
@@ -391,6 +406,7 @@
     <div id="course-section">
       <div class="section-divider"><span class="section-label">選 擇 課 程</span></div>
       <div id="course-cards" class="course-grid"></div>
+      <div id="course-detail-area"></div>
     </div>
 
     <!-- Step 2: 選時段 -->
@@ -599,19 +615,42 @@ function renderCourseCards() {
         <p class="course-card__tagline">${t.tagline || ''}</p>
         <p class="course-card__price">NT$ ${Number(t.price_1).toLocaleString()} / 人起</p>
       </div>
-      <div class="course-card__detail">${(t.description || '').replace(/\n/g, '<br>')}</div>
+    </div>`).join('');
+
+  // 詳情展開區（全寬，独立於 grid 之外）
+  const detailArea = document.getElementById('course-detail-area');
+  detailArea.innerHTML = state.templates.map((t, i) => `
+    <div class="course-detail" id="cd-${i}">
+      <p class="course-detail__text">${(t.description || '').replace(/\n/g, '<br>')}</p>
+      <button class="course-detail__btn" onclick="goToSlots()">選擇時段 →</button>
     </div>`).join('');
 }
 
 function selectCourse(index) {
-  // 取消其他選取
   document.querySelectorAll('.course-card').forEach(el => el.classList.remove('is-selected'));
   document.getElementById(`cc-${index}`).classList.add('is-selected');
 
-  state.selectedTemplate = index;
-  state.selectedSlot     = null;
-  state.selectedStart    = null;
+  const isSame = state.selectedTemplate === index;
+  document.querySelectorAll('.course-detail').forEach(el => el.classList.remove('is-open'));
 
+  if (isSame) {
+    // 再點同一張卡片 → 收起
+    state.selectedTemplate = null;
+    document.getElementById(`cc-${index}`).classList.remove('is-selected');
+  } else {
+    // 新選課程 → 展開詳情
+    state.selectedTemplate = index;
+    state.selectedSlot     = null;
+    state.selectedStart    = null;
+    document.getElementById(`cd-${index}`).classList.add('is-open');
+    document.getElementById(`cd-${index}`).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  renderSlots();
+}
+
+// 使用者主動點「選擇時段 →」才跳轉
+function goToSlots() {
   renderSlots();
   document.getElementById('slot-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
